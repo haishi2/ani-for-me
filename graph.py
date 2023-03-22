@@ -128,9 +128,6 @@ def read_file(files: list[str]) -> ReccomenderGraph:
             for i in range(1, len(lines)):
 
 
-
-
-
 def import_profile(file: str, graph: ReccomenderGraph) -> None:
     """loads a user from a csv file and adds them into the graph
     Preconditions:

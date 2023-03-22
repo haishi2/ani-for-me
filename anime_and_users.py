@@ -130,7 +130,6 @@ class User:
         self.matching_genres = [genre for genre in genres_count if genres_count[genre] >= (num_animes / 2)]
         self.priorities['num_episodes'] = int(episodes_count / num_animes)
 
-
     def calculate_priority_weights(self) -> None:
         """Calculate the priority weights for each category in priority except for num_episodes
         Preconditions:

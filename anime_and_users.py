@@ -107,6 +107,8 @@ class User:
 
 
 if __name__ == '__main__':
+    import doctest
+    doctest.testmod(verbose=True)
     python_ta.check_all(config={
         'extra-imports': ['graph', 'typing'],  # the names (strs) of imported modules
         'allowed-io': ['import_profile', 'save_profile'],  # the names (strs) of functions that call print/open/input

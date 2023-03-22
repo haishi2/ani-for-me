@@ -1,7 +1,7 @@
 """copyright and usage info here"""
+from __future__ import annotations
 import datetime
 from typing import Optional
-from __future__ import annotations
 
 import python_ta
 
@@ -49,7 +49,7 @@ class User:
     - favorite_era: the user's favorite era of anime
     Representation Invariants:
         - all(0 <= priorities[priority] <= 10 for priority in priorities)
-        - len(priorities) == 5
+        - (length of prioities must be 7)
     """
     username: str
     reviews: dict[Anime, Review]

@@ -94,9 +94,13 @@ class ReccomenderGraph:
 
 
 def tag_keywords_and_strip(query: str) -> list[str]:
-    """Takes a query for an anime and simplfies it into its keywords, with only alphanumeric characters and all lowercase"""
+    """Takes a query for an anime and simplfies it into its keywords, with only alphanumeric characters and all lowercase
+    Preconditions:
+            -
+    """
     # re.sub works by subbing anything not in the range of the character ranges provided with the second param
     #the plus after the list bracekts are to remove repetition of anything in the set of characters after the first match
+    #the caret is used to tell the regex to match any characters that are not in this set
     query_cleaned = re.sub('[^09a-zA-z]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
     #add any extra connecting words here (in lowercase)
@@ -113,6 +117,7 @@ def tag_keywords_and_strip(query: str) -> list[str]:
     return query_keywords
 
 def search(query: str, graph: ReccomenderGraph) -> list[aau.Anime]:
+    """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match"""
     pass
 
 # read files in this order: anime, user, reviews

@@ -7,7 +7,7 @@ import python_ta
 
 import anime_and_users as aau
 
-
+#TODO see which instance attributes should be made private, add preconditions
 class Review:
     """An edge that connects a user and an anime which contains the ratings the user gave
 
@@ -99,7 +99,7 @@ def tag_keywords_and_strip(query: str) -> list[str]:
             -
     """
     # re.sub works by subbing anything not in the range of the character ranges provided with the second param
-    #the plus after the list bracekts are to remove repetition of anything in the set of characters after the first match
+    #the plus after the list brackets are to remove repetition of anything in the set of characters after the first match
     #the caret is used to tell the regex to match any characters that are not in this set
     query_cleaned = re.sub('[^09a-zA-z]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
@@ -107,7 +107,7 @@ def tag_keywords_and_strip(query: str) -> list[str]:
     connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to']
 
     for keyword in query_keywords:
-        if keyword.lower() in connecting_words:
+        if keyword.lower() in connecting_words or keyword in ('', '\n'):
             query_keywords.remove(keyword)
         # else:
         #     #this shouldn't be needed since its already cleaned at the syart
@@ -117,7 +117,7 @@ def tag_keywords_and_strip(query: str) -> list[str]:
     return query_keywords
 
 def search(query: str, graph: ReccomenderGraph) -> list[aau.Anime]:
-    """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match"""
+    """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them"""
     pass
 
 # read files in this order: anime, user, reviews
@@ -213,7 +213,7 @@ if __name__ == '__main__':
 
     doctest.testmod(verbose=True)
     python_ta.check_all(config={
-        'extra-imports': ['anime_and_users'],  # the names (strs) of imported modules
+        'extra-imports': ['anime_and_users', 'datetime', 're'],  # the names (strs) of imported modules
         'allowed-io': ['import_profile', 'save_profile', 'read_file'],
         # the names (strs) of functions that call print/open/input
         'max-line-length': 120

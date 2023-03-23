@@ -7,6 +7,7 @@ import python_ta
 
 import graph as g
 
+#TODO see which instance attributes should be made private, add preconditions
 
 class Anime:
     """A class representing a anime node in the ReccomenderTree
@@ -27,6 +28,7 @@ class Anime:
     air_dates: tuple[datetime.date, datetime.date]
     UID: int
     reviews: dict[User, g.Review]
+    tags: list[str]
 
     def __init__(self, title: str, num_episodes: int, genres: list[str],
                  air_dates: tuple[datetime.date, datetime.date], UID: int):
@@ -37,6 +39,7 @@ class Anime:
         self.air_dates = air_dates
         self.UID = UID
         self.reviews = {}
+        self.tags = g.tag_keywords_and_strip(self.title)
 
 
 class User:

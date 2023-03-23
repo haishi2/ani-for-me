@@ -1,6 +1,7 @@
 """copyright and usage info here"""
 from __future__ import annotations
 import datetime
+import re
 
 import python_ta
 
@@ -17,7 +18,7 @@ class Review:
     endpoints: tuple[aau.User, aau.Anime]
     ratings: dict[str, int]
 
-    def __init__(self, e1: aau.User, e2: aau.Anime, ratings: dict[str, int]):
+    def __init__(self, e1: aau.User, e2: aau.Anime, ratings: dict[str, int]) -> None:
         """Add a review and connect the two endpoints
         Preconditions:
             - user and anime both need to exist in the ReccomenderGraph
@@ -71,6 +72,7 @@ class ReccomenderGraph:
         self.users[user].friends_list.append(self.users[friend_user])
         self.users[friend_user].friends_list.append(self.users[user])
 
+    #float is path score between 0 - 10 (actual path score avgd with the similarity)
     def get_all_path_scores(self, depth: int) -> dict[aau.Anime: float]:
         """Find all anime at a certain depth and calculate a path score for each anime based on
         the reviews given to it and the user's priorities
@@ -91,8 +93,31 @@ class ReccomenderGraph:
         raise NotImplementedError
 
 
+def tag_keywords_and_strip(query: str) -> list[str]:
+    """Takes a query for an anime and simplfies it into its keywords, with only alphanumeric characters and all lowercase"""
+    # re.sub works by subbing anything not in the range of the character ranges provided with the second param
+    #the plus after the list bracekts are to remove repetition of anything in the set of characters after the first match
+    query_cleaned = re.sub('[^09a-zA-z]+', ' ', query)
+    query_keywords = query_cleaned.split(' ')
+    #add any extra connecting words here (in lowercase)
+    connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to']
+
+    for keyword in query_keywords:
+        if keyword.lower() in connecting_words:
+            query_keywords.remove(keyword)
+        # else:
+        #     #this shouldn't be needed since its already cleaned at the syart
+        #     query_keywords[query_keywords.index(keyword)] = \
+        #         re.sub('[^0-9a-zA-z]+', ' ', query_keywords[query_keywords.index(keyword)].lower())
+
+    return query_keywords
+
+def search(query: str, graph: ReccomenderGraph) -> list[aau.Anime]:
+    pass
+
 # read files in this order: anime, user, reviews
 # files: ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv']
+#TODO may be an error here where some users aren't read in, if there are any errors in the future investigate this
 def read_file(files: list[str]) -> ReccomenderGraph:
     """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file
     Preconditions:

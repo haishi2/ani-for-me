@@ -62,7 +62,7 @@ class User:
     favorite_animes: list[Anime]
     matching_genres: list[str]
     friends_list: list[User]
-    # priorities contains most of the categories of a review ('Story', 'Animation', 'Sound', 'Character') and an
+    # priorities contains most of the categories of a review ('story', 'animation', 'sound', 'character') and an
     # average of the amount of episodes from the user's favorite anime to get their preferred amount of episodes
     priorities: dict[str, int]
     weights: dict[str, float]
@@ -133,7 +133,7 @@ class User:
                 else:
                     genres_count[genre] += 1
 
-        self.matching_genres = [genre for genre in genres_count if genres_count[genre] >= (num_animes / 2)]
+        self.matching_genres = [genre for genre in genres_count if genres_count[genre] >= int(num_animes / 2)]
         self.priorities['num_episodes'] = int(episodes_count / num_animes)
 
     def calculate_priority_weights(self) -> None:

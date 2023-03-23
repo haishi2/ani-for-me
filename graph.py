@@ -93,8 +93,7 @@ class ReccomenderGraph:
 
 
 # read files in this order: anime, user, reviews
-# remember that the users in csv files dont have friends_list or priorities, so use the (param) = notation when making
-# user classes
+# files: ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv']
 def read_file(files: list[str]) -> ReccomenderGraph:
     """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file
     Preconditions:
@@ -135,10 +134,9 @@ def read_file(files: list[str]) -> ReccomenderGraph:
             favorite_animes = []
             for i in range(1, len(lines)):
                 favorite_animes.append(graph.animes[int(lines[i])])
-            # if(username == 'Verbin'):
-            #     graph.insert_user(User(username=username, favorite_animes=favorite_animes))
-            # else:
-            print(graph.insert_user(User(username=username, favorite_animes=favorite_animes)).username, username)
+
+            # print(graph.insert_user(User(username=username, favorite_animes=favorite_animes)).username, username)
+            graph.insert_user(User(username=username, favorite_animes=favorite_animes))
             line = reader.readline()
 
     with open(files[2], 'r',
@@ -338,6 +336,31 @@ if __name__ == '__main__':
     doctest.testmod(verbose=True)
     python_ta.check_all(config={
         'extra-imports': ['anime_and_users'],  # the names (strs) of imported modules
-        'allowed-io': ['import_profile', 'save_profile', 'read_file'],  # the names (strs) of functions that call print/open/input
+        'allowed-io': ['import_profile', 'save_profile', 'read_file'],
+        # the names (strs) of functions that call print/open/input
         'max-line-length': 120
     })
+    #TODO remove this before submission
+
+    # a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+    # with open(
+    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
+    #         "r", newline='', encoding="utf-8") as reader:
+    #     line = reader.readline()
+    #     while line != '':
+    #         lines = line.split(',')
+    #         if lines[0][-1] == '\n' or lines[0][-1] == '':
+    #             lines[0] = lines[0][0:-1]
+    #         if lines[0] not in a.users:
+    #             print(lines[0])
+    #         line = reader.readline()
+    #
+    # with open(
+    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv",
+    #         "r", newline='', encoding="utf-8") as reader:
+    #     line = reader.readline()
+    #     while line != '':
+    #         lines = line.split(',')
+    #         if int(lines[0]) not in a.animes:
+    #             print(lines[0])
+    #         line = reader.readline()

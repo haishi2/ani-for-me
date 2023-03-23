@@ -101,7 +101,7 @@ def tag_keywords_and_strip(query: str) -> list[str]:
     # re.sub works by subbing anything not in the range of the character ranges provided with the second param
     #the plus after the list brackets are to remove repetition of anything in the set of characters after the first match
     #the caret is used to tell the regex to match any characters that are not in this set
-    query_cleaned = re.sub('[^09a-zA-z]+', ' ', query)
+    query_cleaned = re.sub('[^0-9a-zA-z]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
     #add any extra connecting words here (in lowercase)
     connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to']

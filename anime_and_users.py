@@ -19,6 +19,7 @@ class Anime:
     - air_dates: the dates that the anime aired between
     - UID: the unique identifier for the anime
     - reviews: the reviews for this anime
+    - tags: the search tags for this anime
     Representation Invariants:
         - (air_dates[1] - air_dates[0]).days > 0
     """
@@ -86,7 +87,8 @@ class User:
             self.friends_list = friends_list
         if favorite_era is None:
             self.favorite_era = tuple()
-        self.favorite_era = favorite_era
+        else:
+            self.favorite_era = favorite_era
         if reviews is None:
             self.reviews = {}
         else:

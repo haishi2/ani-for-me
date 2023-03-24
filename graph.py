@@ -73,9 +73,9 @@ class ReccomenderGraph:
         self.users[friend_user].friends_list.append(self.users[user])
 
     #float is path score between 0 - 10 (actual path score avgd with the similarity)
-    def get_all_path_scores(self, depth: int) -> dict[aau.Anime: float]:
+    def get_all_path_scores(self, depth: int, username: str) -> dict[aau.Anime: float]:
         """Find all anime at a certain depth and calculate a path score for each anime based on
-        the reviews given to it and the user's priorities
+        the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
             - depth >= 1
             """
@@ -117,7 +117,10 @@ def tag_keywords_and_strip(query: str) -> list[str]:
     return query_keywords
 
 def search(query: str, graph: ReccomenderGraph) -> list[aau.Anime]:
-    """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them"""
+    """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them
+    Preconditions:
+            -
+    """
     pass
 
 # read files in this order: anime, user, reviews

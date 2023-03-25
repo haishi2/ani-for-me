@@ -106,7 +106,7 @@ def tag_keywords_and_strip(query: str) -> list[str]:
     query_keywords = query_cleaned.split(' ')
     # add any extra connecting words here (in lowercase)
     connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', '1st', '2nd', '3rd', 'first', 'second', 'third',
-                        'season', 'ova','kun']
+                        'season', 'ova','kun', 'a']
 
     for keyword in query_keywords:
         if keyword.lower() in connecting_words or keyword in ('', '\n'):

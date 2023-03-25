@@ -61,7 +61,7 @@ class ReccomenderGraph:
         Preconditions:
             -
         """
-        self.animes[anime.UID] = anime
+        self.animes[anime._UID] = anime
         return anime
 
     def add_friends(self, user: str, friend_user: str) -> None:
@@ -141,10 +141,10 @@ def read_file(files: list[str]) -> ReccomenderGraph:
             lines = line.split(',')
             anime_id = lines[0]
             title = lines[1]
-            genres = []
+            genres = set()
             i = 2
             while all(char.isalpha() for char in lines[i]):
-                genres.append(lines[i])
+                genres.add(lines[i])
                 i += 1
 
             start_date = datetime.datetime.strptime(lines[i], '%m/%d/%Y')
@@ -163,9 +163,9 @@ def read_file(files: list[str]) -> ReccomenderGraph:
                 username = lines[0][0:len(lines[0]) - 1]
             else:
                 username = lines[0]
-            favorite_animes = []
+            favorite_animes = set()
             for i in range(1, len(lines)):
-                favorite_animes.append(graph.animes[int(lines[i])])
+                favorite_animes.add(graph.animes[int(lines[i])])
 
             # print(graph.insert_user(User(username=username, favorite_animes=favorite_animes)).username, username)
             graph.insert_user(aau.User(username=username, favorite_animes=favorite_animes))
@@ -188,6 +188,8 @@ def read_file(files: list[str]) -> ReccomenderGraph:
             ratings['enjoyment'] = int(lines[8])
             Review(user, anime, ratings)
             line = reader.readline()
+
+
     return graph
 
 
@@ -215,12 +217,12 @@ if __name__ == '__main__':
     import doctest
 
     doctest.testmod(verbose=True)
-    python_ta.check_all(config={
-        'extra-imports': ['anime_and_users', 'datetime', 're'],  # the names (strs) of imported modules
-        'allowed-io': ['import_profile', 'save_profile', 'read_file'],
-        # the names (strs) of functions that call print/open/input
-        'max-line-length': 120
-    })
+    # python_ta.check_all(config={
+    #     'extra-imports': ['anime_and_users', 'datetime', 're'],  # the names (strs) of imported modules
+    #     'allowed-io': ['import_profile', 'save_profile', 'read_file'],
+    #     # the names (strs) of functions that call print/open/input
+    #     'max-line-length': 120
+    # })
     # TODO remove this before submission
 
     # a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])

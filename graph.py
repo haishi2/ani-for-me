@@ -7,7 +7,8 @@ import python_ta
 
 import anime_and_users as aau
 
-#TODO see which instance attributes should be made private, add preconditions
+
+# TODO see which instance attributes should be made private, add preconditions
 class Review:
     """An edge that connects a user and an anime which contains the ratings the user gave
 
@@ -61,7 +62,7 @@ class ReccomenderGraph:
         Preconditions:
             -
         """
-        self.animes[anime._UID] = anime
+        self.animes[anime.get_uid()] = anime
         return anime
 
     def add_friends(self, user: str, friend_user: str) -> None:
@@ -72,7 +73,7 @@ class ReccomenderGraph:
         self.users[user].friends_list.append(self.users[friend_user])
         self.users[friend_user].friends_list.append(self.users[user])
 
-    #float is path score between 0 - 10 (actual path score avgd with the similarity)
+    # float is path score between 0 - 10 (actual path score avgd with the similarity)
     def get_all_path_scores(self, depth: int, username: str) -> dict[aau.Anime: float]:
         """Find all anime at a certain depth and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
@@ -99,12 +100,13 @@ def tag_keywords_and_strip(query: str) -> list[str]:
             -
     """
     # re.sub works by subbing anything not in the range of the character ranges provided with the second param
-    #the plus after the list brackets are to remove repetition of anything in the set of characters after the first match
-    #the caret is used to tell the regex to match any characters that are not in this set
-    query_cleaned = re.sub('[^0-9a-zA-z]+', ' ', query)
+    # the plus after the list brackets are to remove repetition of anything in the set of characters after the first match
+    # the caret is used to tell the regex to match any characters that are not in this set
+    query_cleaned = re.sub('[^0-9a-zA-z@]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
-    #add any extra connecting words here (in lowercase)
-    connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to']
+    # add any extra connecting words here (in lowercase)
+    connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', '1st', '2nd', '3rd', 'first', 'second', 'third',
+                        'season']
 
     for keyword in query_keywords:
         if keyword.lower() in connecting_words or keyword in ('', '\n'):
@@ -116,16 +118,22 @@ def tag_keywords_and_strip(query: str) -> list[str]:
 
     return query_keywords
 
+
 def search(query: str, graph: ReccomenderGraph) -> list[aau.Anime]:
     """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them
     Preconditions:
             -
     """
+    # if the amount of tags in the anime is less than the length of the amount of tags in the search term, if
+    # all of its terms are in the tags of the search term, then it's a valid match
+
+    # anything with more than a 33% match (its terms cover 33% of the tags in the serach query) is valid
     pass
+
 
 # read files in this order: anime, user, reviews
 # files: ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv']
-#TODO may be an error here where some users aren't read in, if there are any errors in the future investigate this
+# TODO may be an error here where some users aren't read in, if there are any errors in the future investigate this
 def read_file(files: list[str]) -> ReccomenderGraph:
     """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file
     Preconditions:
@@ -188,7 +196,6 @@ def read_file(files: list[str]) -> ReccomenderGraph:
             ratings['enjoyment'] = int(lines[8])
             Review(user, anime, ratings)
             line = reader.readline()
-
 
     return graph
 

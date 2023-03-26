@@ -94,7 +94,7 @@ class ReccomenderGraph:
         raise NotImplementedError
 
 
-def tag_keywords_and_strip(query: str) -> list[str]:
+def tag_keywords_and_strip(query: str) -> set[str]:
     """Takes a query for an anime and simplfies it into its keywords, with only alphanumeric characters and all lowercase
     Preconditions:
             -
@@ -106,29 +106,53 @@ def tag_keywords_and_strip(query: str) -> list[str]:
     query_keywords = query_cleaned.split(' ')
     # add any extra connecting words here (in lowercase)
     connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', '1st', '2nd', '3rd', 'first', 'second', 'third',
-                        'season', 'ova','kun', 'a']
-
+                        'season', 'ova','kun', 'a', '1', '2', '3']
+    cleaned_query_keywords = set()
     for keyword in query_keywords:
         if keyword.lower() in connecting_words or keyword in ('', '\n'):
-            query_keywords.remove(keyword)
-        # else:
-        #     #this shouldn't be needed since its already cleaned at the syart
-        #     query_keywords[query_keywords.index(keyword)] = \
-        #         re.sub('[^0-9a-zA-z]+', ' ', query_keywords[query_keywords.index(keyword)].lower())
+            # query_keywords.remove(keyword)
+            pass
+        else:
+            # query_keywords[query_keywords.index(keyword)] = query_keywords[query_keywords.index(keyword)].lower()
+            cleaned_query_keywords.add(keyword.lower())
 
-    return query_keywords
+    return cleaned_query_keywords
 
 
-def search(query: str, graph: ReccomenderGraph) -> list[aau.Anime]:
+def search(query: str, graph: ReccomenderGraph):
+        # dict[str, aau.anime]:
     """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them
     Preconditions:
-            -
+            - query is spelled correctly
+            - graph is a valid graph
     """
     # if the amount of tags in the anime is less than the length of the amount of tags in the search term, if
     # all of its terms are in the tags of the search term, then it's a valid match
 
     # anything with more than a 33% match (its terms cover 33% of the tags in the serach query) is valid
-    pass
+    search_res = []
+    query_tags = tag_keywords_and_strip(query)
+    searched = False
+    search_res_dict = {}
+    for anime in graph.animes:
+        anime_tags = graph.animes[anime].get_tags()
+        if len(anime_tags) < len(query_tags):
+            if len(query_tags.intersection(anime_tags)) == len(anime_tags):
+                # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
+                search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
+                searched = True
+        if not searched:
+            if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.4:
+                # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
+                search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
+        searched = False
+
+    search_res = sorted(search_res, key = lambda x: x[1], reverse = True)
+    for item in search_res:
+        search_res_dict[f'{item[0].get_title()}, {item[0].get_uid()}'] = item[0]
+
+    return search_res_dict
+
 
 
 # read files in this order: anime, user, reviews

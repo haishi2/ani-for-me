@@ -33,7 +33,7 @@ class Anime:
     _air_dates: tuple[datetime.date, datetime.date]
     _UID: int
     reviews: dict[User, g.Review]
-    _tags: list[str]
+    _tags: set[str]
 
     def __init__(self, title: str, num_episodes: int, genres: set[str],
                  air_dates: tuple[datetime.date, datetime.date], uid: int):
@@ -60,6 +60,9 @@ class Anime:
 
     def get_air_dates(self) -> tuple[datetime.date, datetime.date]:
         return self._air_dates
+
+    def get_tags(self)-> set[str]:
+        return self._tags
 
     def calculate_average_ratings(self) -> dict[str, float]:
         """Calculate the average ratings for this anime over all of its reviews.

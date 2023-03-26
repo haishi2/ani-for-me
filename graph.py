@@ -106,7 +106,7 @@ def tag_keywords_and_strip(query: str) -> set[str]:
     query_keywords = query_cleaned.split(' ')
     # add any extra connecting words here (in lowercase)
     connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', '1st', '2nd', '3rd', 'first', 'second', 'third',
-                        'season', 'ova','kun', 'a', '1', '2', '3']
+                        'season', 'ova', 'kun', 'a', '1', '2', '3']
     cleaned_query_keywords = set()
     for keyword in query_keywords:
         if keyword.lower() in connecting_words or keyword in ('', '\n'):
@@ -119,8 +119,7 @@ def tag_keywords_and_strip(query: str) -> set[str]:
     return cleaned_query_keywords
 
 
-def search(query: str, graph: ReccomenderGraph):
-        # dict[str, aau.anime]:
+def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
     """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them
     Preconditions:
             - query is spelled correctly
@@ -147,12 +146,11 @@ def search(query: str, graph: ReccomenderGraph):
                 search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
         searched = False
 
-    search_res = sorted(search_res, key = lambda x: x[1], reverse = True)
+    search_res = sorted(search_res, key=lambda x: x[1], reverse=True)
     for item in search_res:
         search_res_dict[f'{item[0].get_title()}, {item[0].get_uid()}'] = item[0]
 
     return search_res_dict
-
 
 
 # read files in this order: anime, user, reviews
@@ -211,13 +209,8 @@ def read_file(files: list[str]) -> ReccomenderGraph:
             lines = line.split(',')
             user = graph.users[lines[0]]
             anime = graph.animes[int(lines[1])]
-            ratings = {}
-            ratings['story'] = int(lines[4])
-            ratings['animation'] = int(lines[5])
-            ratings['sound'] = int(lines[6])
-            ratings['character'] = int(lines[7])
-            ratings['overall'] = int(lines[3])
-            ratings['enjoyment'] = int(lines[8])
+            ratings = {'story': int(lines[4]), 'animation': int(lines[5]), 'sound': int(lines[6]),
+                       'character': int(lines[7]), 'overall': int(lines[3]), 'enjoyment': int(lines[8])}
             Review(user, anime, ratings)
             line = reader.readline()
 

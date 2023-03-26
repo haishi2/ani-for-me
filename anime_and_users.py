@@ -100,14 +100,14 @@ class User:
     friends_list: list[User]
     # priorities contains all of the categories of a review ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall') and an
     # average of the amount of episodes from the user's favorite anime to get their preferred amount of episodes
-    #TODO IMPORTANT: the keys should be ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall', 'num-episodes)
+    #TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall', 'num-episodes)
     priorities: dict[str, int]
     weights: dict[str, float]
     favorite_era: tuple[datetime.date, datetime.date]
 
     # reviews, priorities, and friends_list are optional since they could be loaded in from a users csv file, the regular
     # database users don't have these properties
-    # TODO IMPORTANT: the keys should be ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall', 'num-episodes)
+    # TODO IMPORTANT: the keys in the input should be ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall', 'num-episodes)
     def __init__(self, username: str, favorite_animes: set[Anime],
                  favorite_era: Optional[tuple[datetime.date, datetime.date]] = None,
                  reviews: Optional[dict[Anime, g.Review]] = None, priorities: Optional[dict[str, int]] = None,

@@ -251,7 +251,7 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-        return sorted(scores.items(), key=lambda x: x[1], reverse = True)
+        return scores
 
 
 if __name__ == '__main__':

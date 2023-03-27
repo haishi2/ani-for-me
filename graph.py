@@ -74,7 +74,7 @@ class ReccomenderGraph:
         self.users[friend_user].friends_list.append(self.users[user])
 
     # float is path score between 0 - 10 (actual path score avgd with the similarity)
-    def get_all_path_scores(self, depth: int, username: str) -> dict[aau.Anime: float]:
+    def get_all_path_scores(self, depth: int, user: aau.User) -> dict[aau.Anime: float]:
         """Find all anime at a certain depth and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
@@ -87,7 +87,7 @@ class ReccomenderGraph:
 
     # calc_path_scores should take a list of reviews since to calculate the path score we need to average the ratings on each path
     # weighted by the user's preferences
-    def calculate_path_score(self, path: list[Review]) -> float:
+    def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path
         Preconditions:
             -

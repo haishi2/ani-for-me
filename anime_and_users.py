@@ -47,21 +47,27 @@ class Anime:
         self._tags = g.tag_keywords_and_strip(self._title)
 
     def get_num_episodes(self) -> int:
+        """Returns the number of episodes of the anime"""
         return self._num_episodes
 
     def get_genres(self) -> set[str]:
+        """Returns the genres of the anime"""
         return self._genres
 
     def get_uid(self) -> int:
+        """Returns the UID of the anime"""
         return self._UID
 
     def get_title(self) -> str:
+        """Returns the title of the anime"""
         return self._title
 
     def get_air_dates(self) -> tuple[datetime.date, datetime.date]:
+        """Returns the air dates of the anime"""
         return self._air_dates
 
     def get_tags(self) -> set[str]:
+        """Returns the search tags of the anime"""
         return self._tags
 
     def calculate_average_ratings(self) -> dict[str, float]:
@@ -154,32 +160,21 @@ class User:
         Preconditions:
             - favorite anime isn't empty or reviews isn't empty
         """
-        num_animes = len(self.favorite_animes.union({anime for anime in self.reviews}))
+        animes = self.favorite_animes.union({anime for anime in self.reviews})
         genres_count = {}
         episodes_count = 0
-        visited_anime = []
-        for anime in self.favorite_animes:
+
+        for anime in animes:
             episodes_count += anime.get_num_episodes()
-            visited_anime.append(anime)
             for genre in anime.get_genres():
                 if genre not in genres_count.keys():
                     genres_count[genre] = 1
                 else:
                     genres_count[genre] += 1
 
-        for anime in self.reviews:
-            if anime not in visited_anime:
-                episodes_count += anime.get_num_episodes()
-                for genre in anime.get_genres():
-                    if genre not in genres_count.keys():
-                        genres_count[genre] = 1
-                    else:
-                        genres_count[genre] += 1
-
-        # stripping the spaces from the genre so comparisons are possible
         self.matching_genres = {re.sub('[^a-zA-Z]+', '', genre) for genre in genres_count if
-                                genres_count[genre] >= int(num_animes / 2)}
-        self.priorities['num-episodes'] = int(episodes_count / num_animes)
+                                genres_count[genre] >= int(len(animes) / 2)}
+        self.priorities['num-episodes'] = int(episodes_count / len(animes))
 
     def calculate_priority_weights(self) -> None:
         """Calculate the priority weights for each category in priority except for num_episodes

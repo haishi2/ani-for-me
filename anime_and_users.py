@@ -61,7 +61,7 @@ class Anime:
     def get_air_dates(self) -> tuple[datetime.date, datetime.date]:
         return self._air_dates
 
-    def get_tags(self)-> set[str]:
+    def get_tags(self) -> set[str]:
         return self._tags
 
     def calculate_average_ratings(self) -> dict[str, float]:
@@ -100,7 +100,7 @@ class User:
     friends_list: list[User]
     # priorities contains all of the categories of a review ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall') and an
     # average of the amount of episodes from the user's favorite anime to get their preferred amount of episodes
-    #TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'num-episodes')
+    # TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'num-episodes')
     priorities: dict[str, int]
     weights: dict[str, float]
     favorite_era: tuple[datetime.date, datetime.date]
@@ -108,38 +108,37 @@ class User:
     # reviews, priorities, and friends_list are optional since they could be loaded in from a users csv file, the regular
     # database users don't have these properties
     # TODO IMPORTANT: the keys in the input for priorities should be ('story', 'animation', 'sound', 'character')
-    def __init__(self, username: str, favorite_animes: set[Anime],
+    def __init__(self, username: str, fav_animes: set[Anime],
                  favorite_era: Optional[tuple[datetime.date, datetime.date]] = None,
-                 reviews: Optional[dict[Anime, list[int]]] = None, priorities: Optional[dict[str, int]] = None,
-                 friends_list: Optional[list[User]] = None) -> None:
+                 review: Optional[dict[Anime, list[int]]] = None, priority: Optional[dict[str, int]] = None,
+                 friend_list: Optional[list[User]] = None) -> None:
         """intialize a new user and calculate their priority weights
         Preconditions:
             - favorite era[0] < favorite_era[1]
         """
         self.username = username
-        self.favorite_animes = favorite_animes
-        if friends_list is None:
+        self.favorite_animes = fav_animes
+        if friend_list is None:
             self.friends_list = []
         else:
-            self.friends_list = friends_list
+            self.friends_list = friend_list
         if favorite_era is None:
             self.favorite_era = tuple()
         else:
             self.favorite_era = favorite_era
 
         self.reviews = {}
-        if reviews is not None:
-            for anime in reviews:
-                g.Review(self, anime, {'story': reviews[anime][0], 'animation': reviews[anime][1],
-                                       'sound': reviews[anime][2], 'character': reviews[anime][3],
-                                       'enjoyment': reviews[anime][4], 'overall': reviews[anime][5]})
-
+        if review is not None:
+            for anime in review:
+                g.Review(self, anime, {'story': review[anime][0], 'animation': review[anime][1],
+                                       'sound': review[anime][2], 'character': review[anime][3],
+                                       'enjoyment': review[anime][4], 'overall': review[anime][5]})
 
         self.priorities = {}
         self.matching_genres = set()
         self.weights = {}
-        if priorities is not None:
-            self.priorities = priorities
+        if priority is not None:
+            self.priorities = priority
             self.calculate_genre_match_and_calculate_avg()
             self.calculate_priority_weights()
 
@@ -267,13 +266,13 @@ if __name__ == '__main__':
     date1 = datetime.date(2000, 10, 1)
     date2 = datetime.date(2005, 10, 1)
     a = g.read_file([
-                        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv',
-                        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
-                        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
 
     favorite_animes = {a.animes[1]}
     friends_list = [a.users['Rollie-Chan']]
     priorities = {'story': 8, 'animation': 7, 'sound': 5, 'character': 6}
     reviews = {a.animes[1]: [7, 4, 5, 8, 7, 7]}
     d = User('dave', favorite_animes, (date1, date2), reviews, priorities, friends_list)
-    a.insert_user(d)
+    # a.insert_user(d)

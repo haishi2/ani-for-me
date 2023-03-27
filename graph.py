@@ -49,21 +49,19 @@ class ReccomenderGraph:
         self.users = {}
         self.animes = {}
 
-    def insert_user(self, user: aau.User) -> aau.User:
+    def insert_user(self, user: aau.User) -> None:
         """Add a user into the graph
         Preconditions:
             -
         """
         self.users[user.username] = user
-        return user
 
-    def insert_anime(self, anime: aau.Anime) -> aau.Anime:
+    def insert_anime(self, anime: aau.Anime) -> None:
         """Add an anime into the graph
         Preconditions:
             -
         """
         self.animes[anime.get_uid()] = anime
-        return anime
 
     def add_friends(self, user: str, friend_user: str) -> None:
         """Connect this user and the friend_user together
@@ -80,9 +78,9 @@ class ReccomenderGraph:
         Preconditions:
             - depth >= 2
             """
-        #remember case where the anime only has 1 review (add a check for it)
+        # remember case where the anime only has 1 review (add a check for it)
         # take the result from the helper in User and for each path, calculate its path score
-        #TODO IMPORTANT remember to remove the animes that the user's already watched from the reccomendations
+        # TODO IMPORTANT remember to remove the animes that the user's already watched from the reccomendations
         raise NotImplementedError
 
     # calc_path_scores should take a list of reviews since to calculate the path score we need to average the ratings on each path
@@ -126,6 +124,7 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
     Preconditions:
             - query is spelled correctly
             - graph is a valid graph
+            - query is not empty and contains terms that can be tagged
     """
     # if the amount of tags in the anime is less than the length of the amount of tags in the search term, if
     # all of its terms are in the tags of the search term, then it's a valid match
@@ -200,7 +199,7 @@ def read_file(files: list[str]) -> ReccomenderGraph:
                 favorite_animes.add(graph.animes[int(lines[i])])
 
             # print(graph.insert_user(User(username=username, favorite_animes=favorite_animes)).username, username)
-            graph.insert_user(aau.User(username=username, favorite_animes=favorite_animes))
+            graph.insert_user(aau.User(username=username, fav_animes=favorite_animes))
             line = reader.readline()
 
     with open(files[2], 'r',
@@ -227,16 +226,74 @@ def import_profile(file: str, graph: ReccomenderGraph) -> None:
         - every anime in the user csv file exists in the graph
         - avery user in the friends_list exists
     """
-    raise NotImplementedError
+    with open(file, 'r', encoding='utf-8') as reader:
+        line = reader.readline()
+        username = line.split(',')[0]
+
+        line = reader.readline()
+        animes_id = line.split(',')[0:-1]
+        favorite_animes = set()
+        for anime in animes_id:
+            favorite_animes.add(graph.animes[int(anime)])
+
+        line = reader.readline()
+        friends_user = line.split(',')[0:-1]
+        friends = []
+        for user in friends_user:
+            friends.append(graph.users[user])
+
+        line = reader.readline()
+        lines = line.split(',')
+        date1 = datetime.datetime.strptime(lines[0], '%m/%d/%Y').date()
+        date2 = datetime.datetime.strptime(lines[1], '%m/%d/%Y').date()
+
+        line = reader.readline()
+        lines = line.split(',')
+        priority = {'story': int(lines[0]), 'animation': int(lines[1]), 'sound': int(lines[2]),
+                    'character': int(lines[3])}
+
+        line = reader.readline()
+        reviews = {}
+        while line != '':
+            lines = line.split(',')
+            ratings_int = []
+            for k in range(1, len(lines)):
+                ratings_int.append(int(lines[k]))
+
+            reviews[graph.animes[int(lines[0])]] = ratings_int
+            line = reader.readline()
+
+        graph.insert_user(aau.User(username, favorite_animes, (date1, date2), reviews, priority, friends))
 
 
-# write reviews in as anime name, ratings alternating for every review so can read back in and access the animes by ids
+# write reviews in as anime id, ratings alternating for every review so can read back in and access the animes by ids
 # and create new reviews
 def save_profile(user: aau.User, file_name: str) -> None:
     """save the user's profile into a csv file
     Preconditions:
         -
     """
+    with open(file_name, 'w', encoding='utf-8') as writer:
+        writer.write(f"{user.username},\n")
+
+        for anime in user.favorite_animes:
+            writer.write(f"{str(anime.get_uid())},")
+        writer.write('\n')
+
+        for friend in user.friends_list:
+            writer.write(f"{friend.username},")
+        writer.write('\n')
+
+        writer.write(f"{user.favorite_era[0].month}/{user.favorite_era[0].day}/{user.favorite_era[0].year},")
+        writer.write(f"{user.favorite_era[1].month}/{user.favorite_era[1].day}/{user.favorite_era[1].year},\n")
+
+        writer.write(f"{user.priorities['story']},{user.priorities['animation']},{user.priorities['sound']},"
+                     f"{user.priorities['character']}\n")
+
+        for review in user.reviews:
+            rating = user.reviews[review].ratings
+            writer.write(f"{review.get_uid()},{rating['story']},{rating['animation']},{rating['sound']},"
+                         f"{rating['character']},{rating['enjoyment']},{rating['overall']}\n")
 
 
 if __name__ == '__main__':

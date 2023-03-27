@@ -78,10 +78,11 @@ class ReccomenderGraph:
         """Find all anime at a certain depth and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
-            - depth >= 1
+            - depth >= 2
             """
         #remember case where the anime only has 1 review (add a check for it)
         # take the result from the helper in User and for each path, calculate its path score
+        #TODO IMPORTANT remember to remove the animes that the user's already watched from the reccomendations
         raise NotImplementedError
 
     # calc_path_scores should take a list of reviews since to calculate the path score we need to average the ratings on each path

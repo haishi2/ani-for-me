@@ -146,7 +146,7 @@ class User:
     def get_all_path_scores_helper(self, depth, visited_nodes: list[Anime | User]) -> list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         Preconditions:
-            - depth >= 1
+            - depth >= 2
         """
         raise NotImplementedError
 

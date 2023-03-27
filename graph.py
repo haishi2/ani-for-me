@@ -80,6 +80,7 @@ class ReccomenderGraph:
         Preconditions:
             - depth >= 1
             """
+        #remember case where the anime only has 1 review (add a check for it)
         # take the result from the helper in User and for each path, calculate its path score
         raise NotImplementedError
 
@@ -177,8 +178,8 @@ def read_file(files: list[str]) -> ReccomenderGraph:
                 genres.add(lines[i])
                 i += 1
 
-            start_date = datetime.datetime.strptime(lines[i], '%m/%d/%Y')
-            end_date = datetime.datetime.strptime(lines[i + 1], '%m/%d/%Y')
+            start_date = datetime.datetime.strptime(lines[i], '%m/%d/%Y').date()
+            end_date = datetime.datetime.strptime(lines[i + 1], '%m/%d/%Y').date()
             num_episodes = int(lines[i + 2])
             graph.insert_anime(aau.Anime(title, num_episodes, genres, (start_date, end_date), int(anime_id)))
             line = reader.readline()

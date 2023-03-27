@@ -100,17 +100,17 @@ class User:
     friends_list: list[User]
     # priorities contains all of the categories of a review ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall') and an
     # average of the amount of episodes from the user's favorite anime to get their preferred amount of episodes
-    #TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall', 'num-episodes)
+    #TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'num-episodes')
     priorities: dict[str, int]
     weights: dict[str, float]
     favorite_era: tuple[datetime.date, datetime.date]
 
     # reviews, priorities, and friends_list are optional since they could be loaded in from a users csv file, the regular
     # database users don't have these properties
-    # TODO IMPORTANT: the keys in the input should be ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall', 'num-episodes)
+    # TODO IMPORTANT: the keys in the input for priorities should be ('story', 'animation', 'sound', 'character')
     def __init__(self, username: str, favorite_animes: set[Anime],
                  favorite_era: Optional[tuple[datetime.date, datetime.date]] = None,
-                 reviews: Optional[dict[Anime, g.Review]] = None, priorities: Optional[dict[str, int]] = None,
+                 reviews: Optional[dict[Anime, list[int]]] = None, priorities: Optional[dict[str, int]] = None,
                  friends_list: Optional[list[User]] = None) -> None:
         """intialize a new user and calculate their priority weights
         Preconditions:
@@ -126,15 +126,19 @@ class User:
             self.favorite_era = tuple()
         else:
             self.favorite_era = favorite_era
-        if reviews is None:
-            self.reviews = {}
-        else:
-            self.reviews = reviews
-        if priorities is None:
-            self.priorities = {}
-            self.matching_genres = set()
-            self.weights = {}
-        else:
+
+        self.reviews = {}
+        if reviews is not None:
+            for anime in reviews:
+                g.Review(self, anime, {'story': reviews[anime][0], 'animation': reviews[anime][1],
+                                       'sound': reviews[anime][2], 'character': reviews[anime][3],
+                                       'enjoyment': reviews[anime][4], 'overall': reviews[anime][5]})
+
+
+        self.priorities = {}
+        self.matching_genres = set()
+        self.weights = {}
+        if priorities is not None:
             self.priorities = priorities
             self.calculate_genre_match_and_calculate_avg()
             self.calculate_priority_weights()
@@ -189,7 +193,7 @@ class User:
             if priority not in ('num-episodes', 'overall', 'enjoyment'):
                 self.weights[priority] = self.priorities[priority] / total
 
-    def calculate_similarity_rating(self, anime) -> float:
+    def calculate_similarity_rating(self, anime: Anime) -> float:
         """Calculate a similarity rating between 1 and 10 to give a prediction for how much the user will like the anime
         Preconditions:
             -
@@ -198,9 +202,9 @@ class User:
         weighted_avg = sum([self.weights[key] * anime_avg_ratings[key] for key in self.priorities if
                             key not in ('num-episodes', 'overall', 'enjoyment')]) / 10
 
-        overlap_start_date = max(self.favorite_era[0], anime.get_air_dates[0])
-        overlap_end_date = min(self.favorite_era[1], anime.get_air_dates[1])
-        date_overlap_delta = (overlap_end_date - overlap_start_date).days + 1
+        overlap_start_date = max(self.favorite_era[0], anime.get_air_dates()[0])
+        overlap_end_date = min(self.favorite_era[1], anime.get_air_dates()[1])
+        date_overlap_delta = max((overlap_end_date - overlap_start_date).days + 1, 0)
         user_era_length = (self.favorite_era[1] - self.favorite_era[0]).days + 1
         date_score = round(date_overlap_delta / user_era_length, 2)
 
@@ -225,7 +229,7 @@ class User:
         max_std_deviations_r = (773 - mid) / stddev
 
         if anime.get_num_episodes() < mid:
-            deviations_distance = (mid - anime.num_epsiodes) / stddev
+            deviations_distance = (mid - anime.get_num_episodes()) / stddev
             return 1 - (deviations_distance / max_std_deviations_l)
         else:
             deviations_distance = (anime.get_num_episodes() - mid) / stddev
@@ -247,15 +251,29 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-        return scores
+        return sorted(scores.items(), key=lambda x: x[1], reverse = True)
 
 
 if __name__ == '__main__':
-    import doctest
+    # import doctest
+    #
+    #
+    # doctest.testmod(verbose=True)
+    # python_ta.check_all(config={
+    #     'extra-imports': ['graph', 'typing', 'datetime', 're'],  # the names (strs) of imported modules
+    #     'allowed-io': ['import_profile', 'save_profile'],  # the names (strs) of functions that call print/open/input
+    #     'max-line-length': 120
+    # })
+    date1 = datetime.date(2000, 10, 1)
+    date2 = datetime.date(2005, 10, 1)
+    a = g.read_file([
+                        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv',
+                        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
+                        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
 
-    doctest.testmod(verbose=True)
-    python_ta.check_all(config={
-        'extra-imports': ['graph', 'typing'],  # the names (strs) of imported modules
-        'allowed-io': ['import_profile', 'save_profile'],  # the names (strs) of functions that call print/open/input
-        'max-line-length': 120
-    })
+    favorite_animes = {a.animes[1]}
+    friends_list = [a.users['Rollie-Chan']]
+    priorities = {'story': 8, 'animation': 7, 'sound': 5, 'character': 6}
+    reviews = {a.animes[1]: [7, 4, 5, 8, 7, 7]}
+    d = User('dave', favorite_animes, (date1, date2), reviews, priorities, friends_list)
+    a.insert_user(d)

@@ -206,11 +206,11 @@ class User:
         total_members = len(self.matching_genres.union(anime.get_genres()))
         genre_match_index = round(shared_members / total_members, 2)
 
-        episode_rating = round(self.calculate_epsisode_rating(anime), 2)
+        episode_rating = round(self.calculate_episode_rating(anime), 2)
 
         return round((0.5 * weighted_avg + 0.3 * genre_match_index + 0.1 * episode_rating + 0.1 * date_score), 2) * 10
 
-    def calculate_epsisode_rating(self, anime) -> float:
+    def calculate_episode_rating(self, anime) -> float:
         """Calulcates a normalized score for the number of standard deviations an anime is away from the
         users avereage length.
         """

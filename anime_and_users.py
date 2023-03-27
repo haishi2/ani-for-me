@@ -9,7 +9,7 @@ import python_ta
 import graph as g
 
 
-# IMPORTANT: the parameter for the number of episodes in user.priorities should be written as 'num-episodes'
+# IMPORTANT: parameter for the number of episodes in user.priorities should be written as 'num-episodes'
 # TODO see which instance attributes should be made private, add preconditions
 
 class Anime:

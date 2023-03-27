@@ -81,7 +81,7 @@ class ReccomenderGraph:
         # remember case where the anime only has 1 review (add a check for it)
         # take the result from the helper in User and for each path, calculate its path score
         # TODO IMPORTANT remember to remove the animes that the user's already watched from the reccomendations
-        #remember to sort the output before returning using sorted(list_to_sort, key=lambda x: x[1]) (should sort by scores)
+        #remember to sort the output before returning using sorted(list_to_sort, key=lambda x: x[1]) (should sort by the scores)
         raise NotImplementedError
 
     # calc_path_scores should take a list of reviews since to calculate the path score we need to average the ratings on each path

@@ -127,9 +127,6 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
     Preconditions:
             - query is spelled correctly
             - graph is a valid ReccomenderGraph
-            - len(query) > 0
-            - len(re.sub('[^0-9a-zA-z@]+', ' ', query)) > 0
-            - any(word not in connecting_words for word in re.sub('[^0-9a-zA-z@]+', ' ', query).split(' '))
     """
     # if the amount of tags in the anime is less than the length of the amount of tags in the search term, if
     # all of its terms are in the tags of the search term, then it's a valid match

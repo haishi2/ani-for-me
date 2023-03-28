@@ -10,7 +10,6 @@ import graph as g
 
 
 # IMPORTANT: parameter for the number of episodes in user.priorities should be written as 'num-episodes'
-# TODO see which instance attributes should be made private, add preconditions
 
 class Anime:
     """A class representing a anime node in the ReccomenderTree
@@ -24,8 +23,6 @@ class Anime:
     - tags: the search tags for this anime
     Instance Attributes
     - reviews: the reviews for this anime
-    Representation Invariants:
-        - (air_dates[1] - air_dates[0]).days > 0
     """
     _title: str
     _num_episodes: int
@@ -241,7 +238,6 @@ class User:
         """Reccomend anime based on what the user's friends have watched. If the user has no friends, return an empty
         dict.
         """
-        # this is going to be done solely by the similarity rating
         already_watched = self.favorite_animes.union(self.reviews.keys())
         animes_to_rank = set()
         scores = {}

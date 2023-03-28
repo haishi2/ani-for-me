@@ -123,7 +123,7 @@ def tag_keywords_and_strip(query: str) -> set[str]:
 
 
 def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
-    """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them
+    """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them.
     Preconditions:
             - query is spelled correctly
             - graph is a valid ReccomenderGraph
@@ -136,18 +136,22 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
     query_tags = tag_keywords_and_strip(query)
     searched = False
     search_res_dict = {}
-    for anime in graph.animes:
-        anime_tags = graph.animes[anime].get_tags()
-        if len(anime_tags) < len(query_tags):
-            if len(query_tags.intersection(anime_tags)) == len(anime_tags):
-                # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
-                search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
-                searched = True
-        if not searched:
-            if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.4:
-                # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
-                search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
-        searched = False
+    try:
+        for anime in graph.animes:
+            anime_tags = graph.animes[anime].get_tags()
+            if len(anime_tags) < len(query_tags):
+                if len(query_tags.intersection(anime_tags)) == len(anime_tags):
+                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
+                    search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
+                    searched = True
+            if not searched:
+                if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.4:
+                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
+                    search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
+            searched = False
+    except ZeroDivisionError:
+        print('Invalid query (your query must have alphanumeric characters and must not only contain common words '
+              'such as or, and. Please enter a valid query and try again.')
 
     search_res = sorted(search_res, key=lambda x: x[1], reverse=True)
     for item in search_res:
@@ -305,7 +309,7 @@ if __name__ == '__main__':
     doctest.testmod(verbose=True)
     # python_ta.check_all(config={
     #     'extra-imports': ['anime_and_users', 'datetime', 're'],  # the names (strs) of imported modules
-    #     'allowed-io': ['import_profile', 'save_profile', 'read_file'],
+    #     'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search'],
     #     # the names (strs) of functions that call print/open/input
     #     'max-line-length': 120
     # })

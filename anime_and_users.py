@@ -37,7 +37,11 @@ class Anime:
 
     def __init__(self, title: str, num_episodes: int, genres: set[str],
                  air_dates: tuple[datetime.date, datetime.date], uid: int):
-        """Initialize a new anime"""
+        """Initialize a new anime
+        Preconditions
+            - (air_dates[1] - air_dates[0]).days > 0
+            - num_episodes > 0
+        """
         self._title = title
         self._num_episodes = num_episodes
         self._genres = genres
@@ -72,8 +76,6 @@ class Anime:
 
     def calculate_average_ratings(self) -> dict[str, float]:
         """Calculate the average ratings for this anime over all of its reviews.
-        Preconditions:
-            -
         """
         if self.reviews == {}:
             return {'story': 0, 'animation': 0, 'sound': 0, 'character': 0, 'enjoyment': 0, 'overall': 0}
@@ -120,7 +122,12 @@ class User:
                  friend_list: Optional[list[User]] = None) -> None:
         """intialize a new user and calculate their priority weights
         Preconditions:
-            - favorite era[0] < favorite_era[1]
+            - (favorite era[1] - favorite_era[0]).days > 0
+            - all(priority[p] >= 0 for p in proirity)
+            - all(all(rating >= 0 for rating in review[anime]) for anime in review
+            - Every anime in fav_animes exists in the ReccomenderGraph the user will be added into
+            - Every anime in review exists in the ReccomenderGraph the user will be added into
+            - Every user in friend_list exists in the ReccomenderGraph the user will be added to
         """
         self.username = username
         self.favorite_animes = fav_animes
@@ -158,7 +165,7 @@ class User:
     def calculate_genre_match_and_calculate_avg(self) -> None:
         """Calculate the genres in at least 50% of the anime across the user's favorite anime and reviews
         Preconditions:
-            - favorite anime isn't empty or reviews isn't empty
+            - self.favorite_animes != set() or self.reviews != {}
         """
         animes = self.favorite_animes.union({anime for anime in self.reviews})
         genres_count = {}
@@ -178,8 +185,6 @@ class User:
 
     def calculate_priority_weights(self) -> None:
         """Calculate the priority weights for each category in priority except for num_episodes
-        Preconditions:
-            -
         """
         # this should sum up to 100% because its taking parts out of the sum for each as their percentage share weight
         total = sum(self.priorities.values()) - self.priorities['num-episodes']
@@ -190,7 +195,7 @@ class User:
     def calculate_similarity_rating(self, anime: Anime) -> float:
         """Calculate a similarity rating between 1 and 10 to give a prediction for how much the user will like the anime
         Preconditions:
-            -
+            - anime must be a valid Anime object
         """
         anime_avg_ratings = anime.calculate_average_ratings()
         weighted_avg = sum([self.weights[key] * anime_avg_ratings[key] for key in self.priorities if
@@ -213,6 +218,9 @@ class User:
     def calculate_episode_rating(self, anime) -> float:
         """Calulcates a normalized score for the number of standard deviations an anime is away from the
         users avereage length.
+        Preconditions
+            - anime must be a valid Anime object
+            - self.priorities['num-episodes] > 0
         """
         stddev = 39.64
         mid = self.priorities['num-episodes']
@@ -230,9 +238,8 @@ class User:
             return 1 - (deviations_distance / max_std_deviations_r)
 
     def reccomend_based_on_friends(self) -> dict[Anime: float]:
-        """Reccomend anime based on what the user's friends have watched
-        Preconditions:
-            -
+        """Reccomend anime based on what the user's friends have watched. If the user has no friends, return an empty
+        dict.
         """
         # this is going to be done solely by the similarity rating
         already_watched = self.favorite_animes.union(self.reviews.keys())

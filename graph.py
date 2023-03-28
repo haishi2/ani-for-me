@@ -23,7 +23,7 @@ class Review:
         """Add a review and connect the two endpoints
         Preconditions:
             - user and anime both need to exist in the ReccomenderGraph
-            - the review needs to not be in the current reviews in the tree
+            - the user and anime cannot be previously linked
         """
         self.ratings = ratings
         self.endpoints = (e1, e2)
@@ -43,8 +43,6 @@ class ReccomenderGraph:
 
     def __init__(self) -> None:
         """initialize an empty ReccomenderGraph
-        Preconditions:
-            -
         """
         self.users = {}
         self.animes = {}
@@ -52,21 +50,21 @@ class ReccomenderGraph:
     def insert_user(self, user: aau.User) -> None:
         """Add a user into the graph
         Preconditions:
-            -
+            - user is a valid User object
         """
         self.users[user.username] = user
 
     def insert_anime(self, anime: aau.Anime) -> None:
         """Add an anime into the graph
         Preconditions:
-            -
+            - anime is a valid Anime object
         """
         self.animes[anime.get_uid()] = anime
 
     def add_friends(self, user: str, friend_user: str) -> None:
         """Connect this user and the friend_user together
         Preconditions:
-            - both users exist in the graph
+            - user in self.users and friend_user in self.users
         """
         self.users[user].friends_list.append(self.users[friend_user])
         self.users[friend_user].friends_list.append(self.users[user])
@@ -77,7 +75,8 @@ class ReccomenderGraph:
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
             - depth >= 2
-            """
+            - user in self.users
+        """
         # remember case where the anime only has 1 review (add a check for it)
         # take the result from the helper in User and for each path, calculate its path score
         # TODO IMPORTANT remember to remove the animes that the user's already watched from the reccomendations
@@ -89,7 +88,8 @@ class ReccomenderGraph:
     def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path
         Preconditions:
-            -
+            - user in self.users
+            - all(review.endpoints[0] in self.users and review.endpoints[1] in self.animes for review in path
         """
         # remember to average the caluclated path score with the similarity rating for the anime at the endpoint
         raise NotImplementedError
@@ -98,7 +98,9 @@ class ReccomenderGraph:
 def tag_keywords_and_strip(query: str) -> set[str]:
     """Takes a query for an anime and simplfies it into its keywords, with only alphanumeric characters and all lowercase
     Preconditions:
-            -
+            - len(query) > 0
+            - len(re.sub('[^0-9a-zA-z@]+', ' ', query)) > 0
+            - any(word not in connecting_words for word in re.sub('[^0-9a-zA-z@]+', ' ', query).split(' '))
     """
     # re.sub works by subbing anything not in the range of the character ranges provided with the second param
     # the plus after the list brackets are to remove repetition of anything in the set of characters after the first match
@@ -124,8 +126,10 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
     """Searches for all animes in a ReccomenderGraph with at least a 33% keyword match and returns them
     Preconditions:
             - query is spelled correctly
-            - graph is a valid graph
-            - query is not empty and contains terms that can be tagged
+            - graph is a valid ReccomenderGraph
+            - len(query) > 0
+            - len(re.sub('[^0-9a-zA-z@]+', ' ', query)) > 0
+            - any(word not in connecting_words for word in re.sub('[^0-9a-zA-z@]+', ' ', query).split(' '))
     """
     # if the amount of tags in the anime is less than the length of the amount of tags in the search term, if
     # all of its terms are in the tags of the search term, then it's a valid match
@@ -161,7 +165,8 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
 def read_file(files: list[str]) -> ReccomenderGraph:
     """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file
     Preconditions:
-            - files are formatted correctly
+            - files are formatted correctly in the specified format
+            #TODO specify the file format that the files are going to be in
             - files[0] is the anime file, files[1] is the user file, files[2] is the reviews file
     """
     graph = ReccomenderGraph()
@@ -223,9 +228,9 @@ def import_profile(file: str, graph: ReccomenderGraph) -> None:
     """loads a user from a csv file and adds them into the graph
     Preconditions:
         - files are formatted correctly
-        - user doesn't exist in graph
-        - every anime in the user csv file exists in the graph
-        - avery user in the friends_list exists
+        - user not in graph.users.keys()
+        - every anime in the user csv file exists in graph
+        - avery user in the friends_list exists in graph
     """
     with open(file, 'r', encoding='utf-8') as reader:
         line = reader.readline()
@@ -272,7 +277,7 @@ def import_profile(file: str, graph: ReccomenderGraph) -> None:
 def save_profile(user: aau.User, file_name: str) -> None:
     """save the user's profile into a csv file
     Preconditions:
-        -
+        - user is a valid User object
     """
     with open(file_name, 'w', encoding='utf-8') as writer:
         writer.write(f"{user.username},\n")

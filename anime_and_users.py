@@ -1,4 +1,9 @@
-"""copyright and usage info here"""
+"""
+This module contains the classes and functions relevant to the User and Anime classes
+and calculating the similarity score for Animes.
+
+This file is Copyright (c) 2023 Hai Shi, Liam Maguire, Amelia Wu, and Sanya Chawla.
+"""
 from __future__ import annotations
 import datetime
 import re
@@ -23,6 +28,10 @@ class Anime:
     - tags: the search tags for this anime
     Instance Attributes
     - reviews: the reviews for this anime
+    Representation Invariants:
+        - self._num_episodes > 0
+        - (self.air_dates[1] - self.air_dates[0]).days > 0
+        - len(self._tags) != 0
     """
     _title: str
     _num_episodes: int
@@ -96,7 +105,8 @@ class User:
     - favorite_era: the user's favorite era of anime
     Representation Invariants:
         - all(0 <= priorities[priority] <= 10 for priority in priorities)
-        - (length of prioities must be 7)
+        - len(self.priorities) == 5
+        - len(self.favorite_animes) > 0 or len(self.reviews) > 0
     """
     username: str
     reviews: dict[Anime, g.Review]

@@ -1,4 +1,9 @@
-"""copyright and usage info here"""
+"""
+This module contains the classes and functions relevant to creating and loading a reccomender tree and saving
+and writing user porifles.
+
+This file is Copyright (c) 2023 Hai Shi, Liam Maguire, Amelia Wu, and Sanya Chawla.
+"""
 from __future__ import annotations
 import datetime
 import re
@@ -15,6 +20,8 @@ class Review:
     Instance Attributes
     - endpoints: The two nodes linked by this review
     - ratings: the ratings that the user gave for the individual categories
+    Representation invariants:
+         - all(0 <= self.ratings[rating] <= 10 for rating in self.ratings)
     """
     endpoints: tuple[aau.User, aau.Anime]
     ratings: dict[str, int]

@@ -18,7 +18,7 @@ PROJECT_FILE_PATH = "C:\\Users/shiha/Documents/UNI/year 1/CSC111/csc111/csc111/g
 
 def read_uids() -> list:
     uids = []
-    with open(f"{PROJECT_FILE_PATH}/data/uids_to_remove.csv", 'r') as reader:
+    with open(f"data/uids_to_remove.csv", 'r') as reader:
         line = reader.readline()
         while line != '':
             uids.append(line[:-1])
@@ -39,7 +39,7 @@ def read_and_write_reviews():
     big_lines = []
     # index 0 is uid, 1 is anime id, 2 is overall rating, and then the rest are the ratings for each category
     # (ex. {'Overall': '8', 'Story': '8', 'Animation': '8', 'Sound': '10', 'Character': '9', 'Enjoyment': '8'})
-    with open(f"{PROJECT_FILE_PATH}/data/original_data/reviews(accidentally edited).csv", 'r',
+    with open(f"data/original_data/reviews(accidentally edited).csv", 'r',
               encoding="utf-8") as reader:
         line = reader.readline()
         line = line[:-9]
@@ -70,7 +70,7 @@ def read_and_write_reviews():
             # counter += 1
     # import pprint
     # pprint.pprint(big_lines)
-    with open(f"{PROJECT_FILE_PATH}/data/formatted/formatted_reviews.csv", "w", newline='', encoding="utf-8") as f:
+    with open(f"data/formatted/formatted_reviews.csv", "w", newline='', encoding="utf-8") as f:
         w = csv.writer(f, delimiter=",")
         w.writerows(big_lines)
 
@@ -81,7 +81,7 @@ def read_and_write_profiles():
     # uids_to_remove = read_uids()
     big_lines = []
     # idx 1 username, idx 2 onwards favorite anime
-    with open(f"{PROJECT_FILE_PATH}/data/original_data/profiles.csv", 'r', encoding="utf-8") as reader:
+    with open(f"data/original_data/profiles.csv", 'r', encoding="utf-8") as reader:
         line = reader.readline()
 
         while line != '':
@@ -124,7 +124,7 @@ def read_and_write_profiles():
 
     # import pprint
     # pprint.pprint(big_lines)
-    with open(f"{PROJECT_FILE_PATH}/data/formatted/profiles_formatted.csv", "w", newline='', encoding="utf-8") as f:
+    with open(f"data/formatted/profiles_formatted.csv", "w", newline='', encoding="utf-8") as f:
         w = csv.writer(f, delimiter=",")
         w.writerows(big_lines)
 
@@ -135,7 +135,7 @@ def read_and_write_animes():
     # episodes
     # uids_to_remove = read_uids()
     big_lines = []
-    with open(f"{PROJECT_FILE_PATH}/data/original_data/animes.csv", 'r', errors="ignore", encoding='utf-8') as reader:
+    with open(f"data/original_data/animes.csv", 'r', errors="ignore", encoding='utf-8') as reader:
         line = reader.readline()
 
         while line != '':
@@ -195,7 +195,7 @@ def read_and_write_animes():
             #     big_lines.append(lines)
             line = reader.readline()
 
-    with open(f"{PROJECT_FILE_PATH}/data/formatted/animes_formatted.csv", "w", newline='', encoding="utf-8") as f:
+    with open(f"data/formatted/animes_formatted.csv", "w", newline='', encoding="utf-8") as f:
         w = csv.writer(f, delimiter=",")
         w.writerows(big_lines)
 
@@ -206,7 +206,7 @@ def remove_anime_duplicates() -> list[tuple[str]]:
     Note:
     You have to return tuples here to avoid a hashing error when converting a nested list to a set
     """
-    with open(f"{PROJECT_FILE_PATH}/data/formatted/animes_formatted.csv", 'r', errors="ignore",
+    with open(f"data/formatted/animes_formatted.csv", 'r', errors="ignore",
               encoding='utf-8') as read_obj:
         csv_reader = csv.reader(read_obj)
         lst_of_csv = list(csv_reader)
@@ -218,7 +218,7 @@ def remove_anime_duplicates() -> list[tuple[str]]:
 def write_anime_no_duplicates() -> None:
     """Write to a new file of the anime after having removed the duplicates"""
     animes = remove_anime_duplicates()
-    with open(f"{PROJECT_FILE_PATH}/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv",
+    with open(f"data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv",
               'w', newline='',
               encoding="utf-8") as file:
         writer = csv.writer(file, delimiter=",")
@@ -228,7 +228,7 @@ def write_anime_no_duplicates() -> None:
 # There shouldn't be any other problems but I'll leave this here in case
 # def remove_user_no_reviews() -> list[list[str]]:
 #     """Remove users without any reviews"""
-#     with open(f"{PROJECT_FILE_PATH}/data/formatted/formatted_reviews.csv", 'r', errors="ignore") as read_obj:
+#     with open(f"data/formatted/formatted_reviews.csv", 'r', errors="ignore") as read_obj:
 #         csv_reader = csv.reader(read_obj)
 #         lst_of_csv = list(csv_reader)
 #
@@ -241,7 +241,7 @@ def remove_review_duplicates() -> list[tuple[str]]:
     Note:
     You have to return tuples here to avoid a hashing error when converting a nested list to a set
     """
-    with open(f"{PROJECT_FILE_PATH}/data/formatted/formatted_reviews.csv", 'r', errors="ignore") as read_obj:
+    with open(f"data/formatted/formatted_reviews.csv", 'r', errors="ignore") as read_obj:
         csv_reader = csv.reader(read_obj)
         lst_of_csv = list(csv_reader)
 
@@ -254,7 +254,7 @@ def write_review_no_duplicates() -> None:
     """Write to a new file of the reviews after having removed the duplicates
     """
     reviews = remove_review_duplicates()
-    with open(f"{PROJECT_FILE_PATH}/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv",
+    with open(f"data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv",
               'w',
               newline='',
               encoding="utf-8") as file:
@@ -269,7 +269,7 @@ def remove_user_duplicate() -> list[tuple[str]]:
     Note:
     You have to return tuples here to avoid a hashing error when converting a nested list to a set
     """
-    with open(f"{PROJECT_FILE_PATH}/data/formatted/profiles_formatted.csv", 'r', errors="ignore") as read_obj:
+    with open(f"data/formatted/profiles_formatted.csv", 'r', errors="ignore") as read_obj:
         csv_reader = csv.reader(read_obj)
         lst_of_csv = list(csv_reader)
 
@@ -281,7 +281,7 @@ def write_profiles_no_duplicates() -> None:
     """Write to a new file of the profiles after having removed the duplicates
     """
     profiles = remove_user_duplicate()
-    with open(f"{PROJECT_FILE_PATH}/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
+    with open(f"data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
               'w',
               newline='',
               encoding="utf-8") as file:
@@ -293,13 +293,13 @@ def fix_inconsistent_users() -> tuple[list[Any], list[Any]]:
     """Returns a tuple where index 0 and 1 are all reviews and profiles that have users that are both in the profiles
     and reviews data sets respectively
     """
-    with open(f"{PROJECT_FILE_PATH}/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv",
+    with open(f"data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv",
               'r',
               errors="ignore") as read_obj:
         csv_reader = csv.reader(read_obj)
         reviews = list(csv_reader)
 
-    with open(f"{PROJECT_FILE_PATH}/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
+    with open(f"data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
               'r',
               errors="ignore") as read_obj:
         csv_reader = csv.reader(read_obj)
@@ -325,12 +325,12 @@ def write_consistent_users() -> None:
     consistent_data = fix_inconsistent_users()
     reviews, profiles = consistent_data[0], consistent_data[1]
 
-    with open(f"{PROJECT_FILE_PATH}/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv", 'w',
+    with open(f"data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv", 'w',
               newline='', encoding="utf-8") as file:
         writer = csv.writer(file, delimiter=",")
         writer.writerows(profiles)
 
-    with open(f"{PROJECT_FILE_PATH}/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv", 'w',
+    with open(f"data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv", 'w',
               newline='', encoding="utf-8") as file:
         writer = csv.writer(file, delimiter=",")
         writer.writerows(reviews)

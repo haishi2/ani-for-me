@@ -7,13 +7,6 @@ from typing import Any, List, Tuple
 # when recompiling, use reviews(accidentally edited).csv, profiles.csv, and animes.csv
 # (use the files that I provided since i removed a bunch of entries and columns)
 
-# TODO: change file path to your project folder path
-# I had this bug with the file path this format should work tho
-# "C:\\Users\<rest of the path>" (use backslashes)
-PROJECT_FILE_PATH = "C:\\Users/shiha/Documents/UNI/year 1/CSC111/csc111/csc111/group_assignment/csc111_project_formatted_files_and_code"
-
-"C:\\Users\ironx\OneDrive\Documents\CSC\csc111 project formatted files and code"
-
 #recompile order: read_and_write_animes. read_and_write_profiles, read_and_write_reviews, and then run the duplicate clearers any way
 
 def read_uids() -> list:

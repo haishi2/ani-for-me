@@ -2,7 +2,7 @@
 This module contains the classes and functions relevant to the User and Anime classes
 and calculating the similarity score for Animes.
 
-This file is Copyright (c) 2023 Hai Shi, Liam Maguire, Amelia Wu, and Sanya Chawla.
+This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """
 from __future__ import annotations
 import datetime

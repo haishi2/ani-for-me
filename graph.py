@@ -138,7 +138,7 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
     # if the amount of tags in the anime is less than the length of the amount of tags in the search term, if
     # all of its terms are in the tags of the search term, then it's a valid match
 
-    # anything with more than a 33% match (its terms cover 33% of the tags in the serach query) is valid
+    # anything with more than a 40% match (its terms cover 40 % of the tags in the serach query) is valid
     search_res = []
     query_tags = tag_keywords_and_strip(query)
     searched = False

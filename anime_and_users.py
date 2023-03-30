@@ -134,6 +134,8 @@ class User:
             - (favorite era[1] - favorite_era[0]).days > 0
             - all(priority[p] >= 0 for p in proirity)
             - all(all(rating >= 0 for rating in review[anime]) for anime in review
+            - len({anime for anime in review}) == len(review)
+            - len(set(friend_list)) == len(friend_list)
             - Every anime in fav_animes exists in the ReccomenderGraph the user will be added into
             - Every anime in review exists in the ReccomenderGraph the user will be added into
             - Every user in friend_list exists in the ReccomenderGraph the user will be added to
@@ -172,11 +174,13 @@ class User:
         raise NotImplementedError
 
     def calculate_genre_match_and_calculate_avg(self) -> None:
-        """Calculate the genres in at least 50% of the anime across the user's favorite anime and reviews
+        """Calculate the genres in at least 50% of the anime across the user's favorite anime and reviews with a overall
+        rating higher than 4
         Preconditions:
             - self.favorite_animes != set() or self.reviews != {}
         """
-        animes = self.favorite_animes.union({anime for anime in self.reviews})
+        animes = self.favorite_animes.union({anime for anime in self.reviews
+                                             if self.reviews[anime].ratings['overall'] > 4})
         genres_count = {}
         episodes_count = 0
 
@@ -195,7 +199,6 @@ class User:
     def calculate_priority_weights(self) -> None:
         """Calculate the priority weights for each category in priority except for num_episodes
         """
-        # this should sum up to 100% because its taking parts out of the sum for each as their percentage share weight
         total = sum(self.priorities.values()) - self.priorities['num-episodes']
         for priority in self.priorities:
             if priority not in ('num-episodes', 'overall', 'enjoyment'):
@@ -280,9 +283,11 @@ if __name__ == '__main__':
         'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
         'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
 
-    favorite_animes = {a.animes[1]}
-    friends_list = [a.users['Rollie-Chan']]
-    priorities = {'story': 8, 'animation': 7, 'sound': 5, 'character': 6}
-    reviews = {a.animes[1]: [7, 4, 5, 8, 7, 7]}
-    d = User('dave', favorite_animes, (date1, date2), reviews, priorities, friends_list)
+    # favorite_animes = {a.animes[1]}
+    # friends_list = [a.users['Rollie-Chan']]
+    # priorities = {'story': 8, 'animation': 7, 'sound': 5, 'character': 6}
+    # reviews = {a.animes[1]: [7, 4, 5, 8, 7, 7]}
+    # d = User('dave', favorite_animes, (date1, date2), reviews, priorities, friends_list)
+    g.import_profile('dave.csv', a)
+    d = a.users['dave']
     # a.insert_user(d)

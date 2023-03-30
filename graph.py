@@ -1,6 +1,6 @@
 """
 This module contains the classes and functions relevant to creating and loading a reccomender tree and saving
-and writing user porifles.
+and writing user profiles.
 
 This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """

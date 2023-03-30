@@ -171,10 +171,17 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
 # files: ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv']
 # TODO may be an error here where some users aren't read in, if there are any errors in the future investigate this
 def read_file(files: list[str]) -> ReccomenderGraph:
-    """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file
+    """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file in the format:
+    Reviews:
+        index 0 is uid, 1 is anime id, 2 is overall rating, and then the rest are the ratings for each category
+        (ex. {'Overall': '8', 'Story': '8', 'Animation': '8', 'Sound': '10', 'Character': '9', 'Enjoyment': '8'})
+    Profiles:
+        index 1 username, index 2 onwards favorite anime
+    Anime:
+        index 1 is id, index 2 is title, next idxs are genres until dates,
+        start dates first index after, end date second index after, last index is number of episodes
     Preconditions:
             - files are formatted correctly in the specified format
-            #TODO specify the file format that the files are going to be in
             - files[0] is the anime file, files[1] is the user file, files[2] is the reviews file
     """
     graph = ReccomenderGraph()

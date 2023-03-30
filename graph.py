@@ -158,7 +158,7 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
             searched = False
     except ZeroDivisionError:
         print('Invalid query (your query must have alphanumeric characters and must not only contain common words '
-              'such as or, and. Please enter a valid query and try again.')
+              'such as or, and). Please enter a valid query and try again.')
 
     search_res = sorted(search_res, key=lambda x: x[1], reverse=True)
     for item in search_res:

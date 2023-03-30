@@ -28,7 +28,6 @@ def vet_user(user: str):
 
 
 def read_and_write_reviews():
-    # uids_to_remove = read_uids()
     big_lines = []
     # index 0 is uid, 1 is anime id, 2 is overall rating, and then the rest are the ratings for each category
     # (ex. {'Overall': '8', 'Story': '8', 'Animation': '8', 'Sound': '10', 'Character': '9', 'Enjoyment': '8'})
@@ -47,12 +46,6 @@ def read_and_write_reviews():
                 if (cond1 and cond2):
                     for i in range(3, 9):
                         lines[i] = re.search(r'\d+', lines[i]).group()
-                    # lines[3] = re.search(r'\d+', lines[3]).group()
-                    # lines[4] = re.search(r'\d+', lines[4]).group()
-                    # lines[5] = re.search(r'\d+', lines[5]).group()
-                    # lines[6] = re.search(r'\d+', lines[6]).group()
-                    # lines[7] = re.search(r'\d+', lines[7]).group()
-                    # lines[8] = re.search(r'\d+', lines[8]).group()
 
                     big_lines.append(lines)
             except AttributeError:
@@ -71,7 +64,6 @@ def read_and_write_reviews():
 # don't limit the amount here
 # people without reviews will still be in the csv file, they'll just only have a username
 def read_and_write_profiles():
-    # uids_to_remove = read_uids()
     big_lines = []
     # idx 1 username, idx 2 onwards favorite anime
     with open(f"data/original_data/profiles.csv", 'r', encoding="utf-8") as reader:
@@ -103,17 +95,6 @@ def read_and_write_profiles():
                 pass
 
             line = reader.readline()
-            # #removing blank indices
-            # stuff_to_remove = []
-            # for i in range(len(lines)):
-            #     if lines[i] == '':
-            #         stuff_to_remove.append(lines[i])
-            # while stuff_to_remove != []:
-            #     lines.remove(stuff_to_remove.pop())
-            #
-            # if (cond2):
-            #     big_lines.append(lines)
-            # line = reader.readline()
 
     # import pprint
     # pprint.pprint(big_lines)
@@ -126,7 +107,6 @@ def read_and_write_profiles():
 def read_and_write_animes():
     # idx 1 is anime id, idx2 is title, next idxs are genres til dates, start dates first, end date second, last idx is
     # episodes
-    # uids_to_remove = read_uids()
     big_lines = []
     with open(f"data/original_data/animes.csv", 'r', errors="ignore", encoding='utf-8') as reader:
         line = reader.readline()
@@ -153,13 +133,11 @@ def read_and_write_animes():
                                 genre += char
                         lines[j] = genre
 
-                    # fixing dates
                     # i subtract 1 here to correct for index counting starting at 0
                     if len(lines) - end_idx - 1 != 4 or lines[end_idx + 4] == '\n' or lines[end_idx + 4] == '':
                         uids_to_remove.append(lines[0])
                         raise AttributeError
                     else:
-                        # the date formats that aren't for movies are fixed
                         months = {month: index for index, month in enumerate(calendar.month_abbr) if month}
                         start_date_numbers = re.findall(r'\b\d+\b', lines[end_idx + 1])
                         end_date_numbers = re.findall(r'\b\d+\b', lines[end_idx + 2])
@@ -168,12 +146,8 @@ def read_and_write_animes():
                             raise AttributeError
                         start_date = str(months[lines[end_idx + 1][1:4]]) + '/' + start_date_numbers[0] \
                                      + '/' + end_date_numbers[0]
-                        # start_date = str(months[lines[end_idx + 1][1:4]]) + '/' + lines[end_idx + 1][-1] \
-                        #              + '/' + lines[end_idx + 2][1:5]
                         end_date = str(months[lines[end_idx + 2][9:12]]) + '/' + end_date_numbers[1] \
                                    + '/' + lines[end_idx + 3][1:5]
-                        # end_date = str(months[lines[end_idx + 2][9:12]]) + '/' + lines[end_idx + 2][13:] \
-                        #            + '/' + lines[end_idx + 3][1:5]
 
                         lines[end_idx + 4] = re.search(r'\d+', lines[end_idx + 4]).group()
                         lines[end_idx + 1] = start_date

@@ -15,6 +15,7 @@ import graph as g
 
 
 # IMPORTANT: parameter for the number of episodes in user.priorities should be written as 'num-episodes'
+# when refeeding reviews, for the user recalculate the genre match using the provided function.
 
 class Anime:
     """A class representing a anime node in the ReccomenderTree

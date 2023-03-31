@@ -78,7 +78,7 @@ class ReccomenderGraph:
 
     # float is path score between 0 - 10 (actual path score avgd with the similarity)
     def get_all_path_scores(self, depth: int, user: aau.User) -> list[tuple[aau.Anime, float]]:
-        """Find all anime at a certain depth and calculate a path score for each anime based on
+        """Find all anime at a path length of 3 and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
             - depth >= 2

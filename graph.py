@@ -13,7 +13,8 @@ import python_ta
 import anime_and_users as aau
 
 
-# TODO see which instance attributes should be made private, add preconditions
+# a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+
 class Review:
     """An edge that connects a user and an anime which contains the ratings the user gave
 
@@ -58,6 +59,7 @@ class ReccomenderGraph:
         """Add a user into the graph
         Preconditions:
             - user is a valid User object
+            - user.username not in a.users
         """
         self.users[user.username] = user
 
@@ -65,6 +67,7 @@ class ReccomenderGraph:
         """Add an anime into the graph
         Preconditions:
             - anime is a valid Anime object
+            - anime.get_title not in a.animes
         """
         self.animes[anime.get_uid()] = anime
 
@@ -77,53 +80,64 @@ class ReccomenderGraph:
         self.users[friend_user].friends_list.append(self.users[user])
 
     # float is path score between 0 - 10 (actual path score avgd with the similarity)
-    def get_all_path_scores(self, depth: int, user: aau.User) -> list[tuple[aau.Anime, float]]:
+    def get_all_path_scores(self, user: aau.User) -> list[tuple[aau.Anime, float]]:
         """Find all anime at a path length of 3 and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
             - depth >= 2
             - user in self.users
         """
-        # remember case where the anime only has 1 review (add a check for it)
-        # take the result from the helper in User and for each path, calculate its path score
-        # TODO IMPORTANT remember to remove the animes that the user's already watched from the reccomendations
-        #remember to sort the output before returning using sorted(list_to_sort, key=lambda x: x[1]) (should sort by the scores)
-        raise NotImplementedError
 
-    # calc_path_scores should take a list of reviews since to calculate the path score we need to average the ratings on each path
-    # weighted by the user's preferences
+        paths = [pa for pa in user.get_all_path_scores_helper(0, [], []) if len(pa) > 2]
+        scores = []
+        for path in paths:
+            scores.append((path[-1].endpoints[1], self.calculate_path_score(path, user)))
+
+        return sorted(scores, key=lambda x: x[1], reverse=True)
+
     def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path
         Preconditions:
             - user in self.users
             - all(review.endpoints[0] in self.users and review.endpoints[1] in self.animes for review in path
         """
-        # remember to average the caluclated path score with the similarity rating for the anime at the endpoint
-        raise NotImplementedError
+
+        anime = path[-1].endpoints[1]
+        sim_rating = user.calculate_similarity_rating(anime)
+        review_sums = {'story': 0, 'animation': 0, 'sound': 0, 'character': 0, 'enjoyment': 0, 'overall': 0}
+
+        for i in range(1, len(path)):
+            for rating in path[i].ratings:
+                review_sums[rating] += path[i].ratings[rating]
+        review_averages = {category: review_sums[category] / (len(path) - 1) for category in review_sums}
+        user_review = {category: review_sums[category] / (len(path) - 1) for category in path[0].ratings}
+        weighted_avg = sum([user.weights[key] * review_averages[key] for key in user.priorities if
+                            key not in ('num-episodes', 'overall', 'enjoyment')])
+        user_review_avg = sum([user.weights[key] * user_review[key] for key in user.priorities if
+                               key not in ('num-episodes', 'overall', 'enjoyment')])
+        total_avg = ((weighted_avg * 0.5 + review_averages['overall'] * 0.1 + review_averages['enjoyment'] * 0.1
+                      + user_review_avg * 0.2 + ((user_review['overall'] + user_review['enjoyment']) / 2) * 0.1)
+                     + sim_rating) / 2
+        return total_avg
 
 
 def tag_keywords_and_strip(query: str) -> set[str]:
-    """Takes a query for an anime and simplfies it into its keywords, with only alphanumeric characters and all lowercase
+    """Takes a query for an anime and simplfies it into its keywords, with only
+    alphanumeric characters and all lowercase
     Preconditions:
             - len(query) > 0
             - len(re.sub('[^0-9a-zA-z@]+', ' ', query)) > 0
             - any(word not in connecting_words for word in re.sub('[^0-9a-zA-z@]+', ' ', query).split(' '))
     """
-    # re.sub works by subbing anything not in the range of the character ranges provided with the second param
-    # the plus after the list brackets are to remove repetition of anything in the set of characters after the first match
-    # the caret is used to tell the regex to match any characters that are not in this set
     query_cleaned = re.sub('[^0-9a-zA-z@]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
-    # add any extra connecting words here (in lowercase)
     connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', '1st', '2nd', '3rd', 'first', 'second', 'third',
                         'season', 'ova', 'kun', 'a', '1', '2', '3']
     cleaned_query_keywords = set()
     for keyword in query_keywords:
         if keyword.lower() in connecting_words or keyword in ('', '\n'):
-            # query_keywords.remove(keyword)
             pass
         else:
-            # query_keywords[query_keywords.index(keyword)] = query_keywords[query_keywords.index(keyword)].lower()
             cleaned_query_keywords.add(keyword.lower())
 
     return cleaned_query_keywords
@@ -135,10 +149,6 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
             - query is spelled correctly
             - graph is a valid ReccomenderGraph
     """
-    # if the amount of tags in the anime is less than the length of the amount of tags in the search term, if
-    # all of its terms are in the tags of the search term, then it's a valid match
-
-    # anything with more than a 40% match (its terms cover 40 % of the tags in the serach query) is valid
     search_res = []
     query_tags = tag_keywords_and_strip(query)
     searched = False
@@ -148,12 +158,10 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
             anime_tags = graph.animes[anime].get_tags()
             if len(anime_tags) < len(query_tags):
                 if len(query_tags.intersection(anime_tags)) == len(anime_tags):
-                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
                     searched = True
             if not searched:
                 if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.4:
-                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
             searched = False
     except ZeroDivisionError:
@@ -167,9 +175,6 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
     return search_res_dict
 
 
-# read files in this order: anime, user, reviews
-# files: ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv']
-# TODO may be an error here where some users aren't read in, if there are any errors in the future investigate this
 def read_file(files: list[str]) -> ReccomenderGraph:
     """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file in the format:
     Reviews:
@@ -219,7 +224,6 @@ def read_file(files: list[str]) -> ReccomenderGraph:
             for i in range(1, len(lines)):
                 favorite_animes.add(graph.animes[int(lines[i])])
 
-            # print(graph.insert_user(User(username=username, favorite_animes=favorite_animes)).username, username)
             graph.insert_user(aau.User(username=username, fav_animes=favorite_animes))
             line = reader.readline()
 
@@ -287,8 +291,6 @@ def import_profile(file: str, graph: ReccomenderGraph) -> None:
         graph.insert_user(aau.User(username, favorite_animes, (date1, date2), reviews, priority, friends))
 
 
-# write reviews in as anime id, ratings alternating for every review so can read back in and access the animes by ids
-# and create new reviews
 def save_profile(user: aau.User, file_name: str) -> None:
     """save the user's profile into a csv file
     Preconditions:
@@ -321,33 +323,9 @@ if __name__ == '__main__':
     import doctest
 
     doctest.testmod(verbose=True)
-    # python_ta.check_all(config={
-    #     'extra-imports': ['anime_and_users', 'datetime', 're'],  # the names (strs) of imported modules
-    #     'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search'],
-    #     # the names (strs) of functions that call print/open/input
-    #     'max-line-length': 120
-    # })
-    # TODO remove this before submission
-
-    # a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
-    # with open(
-    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
-    #         "r", newline='', encoding="utf-8") as reader:
-    #     line = reader.readline()
-    #     while line != '':
-    #         lines = line.split(',')
-    #         if lines[0][-1] == '\n' or lines[0][-1] == '':
-    #             lines[0] = lines[0][0:-1]
-    #         if lines[0] not in a.users:
-    #             print(lines[0])
-    #         line = reader.readline()
-    #
-    # with open(
-    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv",
-    #         "r", newline='', encoding="utf-8") as reader:
-    #     line = reader.readline()
-    #     while line != '':
-    #         lines = line.split(',')
-    #         if int(lines[0]) not in a.animes:
-    #             print(lines[0])
-    #         line = reader.readline()
+    python_ta.check_all(config={
+        'extra-imports': ['anime_and_users', 'datetime', 're'],
+        'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search'],
+        'disable': ['too-many-nested-blocks', 'too-many-locals'],
+        'max-line-length': 120
+    })

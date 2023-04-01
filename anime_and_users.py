@@ -38,12 +38,12 @@ class Anime:
     _num_episodes: int
     _genres: set[str]
     _air_dates: tuple[datetime.date, datetime.date]
-    _UID: int
+    _uid: int
     reviews: dict[User, g.Review]
     _tags: set[str]
 
     def __init__(self, title: str, num_episodes: int, genres: set[str],
-                 air_dates: tuple[datetime.date, datetime.date], uid: int):
+                 air_dates: tuple[datetime.date, datetime.date], uid: int) -> None:
         """Initialize a new anime
         Preconditions
             - (air_dates[1] - air_dates[0]).days > 0
@@ -53,7 +53,7 @@ class Anime:
         self._num_episodes = num_episodes
         self._genres = genres
         self._air_dates = air_dates
-        self._UID = uid
+        self._uid = uid
         self.reviews = {}
         self._tags = g.tag_keywords_and_strip(self._title)
 
@@ -67,7 +67,7 @@ class Anime:
 
     def get_uid(self) -> int:
         """Returns the UID of the anime"""
-        return self._UID
+        return self._uid
 
     def get_title(self) -> str:
         """Returns the title of the anime"""
@@ -92,6 +92,39 @@ class Anime:
                 ratings_dict[key] += self.reviews[review].ratings[key]
 
         return {section: round(ratings_dict[section] / len(self.reviews), 2) for section in ratings_dict}
+
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
+            list[list[g.Review]]:
+        """Helper function for get_all_path_scores that calculates all the paths
+        Preconditions:
+            - depth >= 2
+        """
+        # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
+        # but it takes more than 1 minute to calculate
+        if depth == 3 or len(self.reviews) == 1:
+            visited_reviews = []
+            visited_path = []
+            if visited_nodes[-1] not in added_ends and visited_nodes[-2] not in added_ends:
+                if visited_nodes[-1] not in added_ends:
+                    added_ends.append(visited_nodes[-1])
+                else:
+                    added_ends.append(visited_nodes[-2])
+                for i in range(0, len(visited_nodes) - 1, 2):
+                    visited_reviews.append(visited_nodes[i].reviews[visited_nodes[i + 1]])
+                visited_path.append(visited_reviews)
+            return visited_path
+        else:
+            all_paths = []
+            for opposite_endp in self.reviews:
+                if opposite_endp not in visited_nodes:
+                    visited_nodes.append(self)
+                    visited_nodes.append(opposite_endp)
+                    rec = opposite_endp.get_all_path_scores_helper(depth + 1, visited_nodes, added_ends)
+                    visited_nodes.pop()
+                    visited_nodes.pop()
+                    if rec != [] and rec is not None:
+                        all_paths.extend(rec)
+            return all_paths
 
 
 class User:
@@ -163,37 +196,63 @@ class User:
         self.weights = {}
         if priority is not None:
             self.priorities = priority
-            self.calculate_genre_match_and_calculate_avg()
+            self.calculate_genre_match_avg()
             self.calculate_priority_weights()
 
-    def get_all_path_scores_helper(self, depth, visited_nodes: list[Anime | User]) -> list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
+            list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         Preconditions:
             - depth >= 2
         """
-        raise NotImplementedError
+        # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
+        # but it takes more than 1 minute to calculate
+        if depth == 3 or len(self.reviews) == 1:
+            visited_reviews = []
+            visited_path = []
+            if visited_nodes[-1] not in added_ends and visited_nodes[-2] not in added_ends:
+                if visited_nodes[-1] not in added_ends:
+                    added_ends.append(visited_nodes[-1])
+                else:
+                    added_ends.append(visited_nodes[-2])
+                for i in range(0, len(visited_nodes) - 1, 2):
+                    visited_reviews.append(visited_nodes[i].reviews[visited_nodes[i + 1]])
+                visited_path.append(visited_reviews)
+            return visited_path
+        else:
+            all_paths = []
+            for opposite_endp in self.reviews:
+                if opposite_endp not in visited_nodes:
+                    visited_nodes.append(self)
+                    visited_nodes.append(opposite_endp)
+                    rec = opposite_endp.get_all_path_scores_helper(depth + 1, visited_nodes, added_ends)
+                    visited_nodes.pop()
+                    visited_nodes.pop()
+                    if rec != [] and rec is not None:
+                        all_paths.extend(rec)
+            return all_paths
 
-    def calculate_genre_match_and_calculate_avg(self) -> None:
+    def calculate_genre_match_avg(self) -> None:
         """Calculate the genres in at least 50% of the anime across the user's favorite anime and reviews with a overall
         rating higher than 4
         Preconditions:
             - self.favorite_animes != set() or self.reviews != {}
         """
-        animes = self.favorite_animes.union({anime for anime in self.reviews
-                                             if self.reviews[anime].ratings['overall'] > 4})
+        animes = self.favorite_animes.union({ani for ani in self.reviews
+                                             if self.reviews[ani].ratings['overall'] > 4})
         genres_count = {}
         episodes_count = 0
 
         for anime in animes:
             episodes_count += anime.get_num_episodes()
             for genre in anime.get_genres():
-                if genre not in genres_count.keys():
+                if genre not in genres_count:
                     genres_count[genre] = 1
                 else:
                     genres_count[genre] += 1
 
-        self.matching_genres = {re.sub('[^a-zA-Z]+', '', genre) for genre in genres_count if
-                                genres_count[genre] >= int(len(animes) / 2)}
+        self.matching_genres = {re.sub('[^a-zA-Z]+', '', gen) for gen in genres_count if
+                                genres_count[gen] >= int(len(animes) / 2)}
         self.priorities['num-episodes'] = int(episodes_count / len(animes))
 
     def calculate_priority_weights(self) -> None:
@@ -227,7 +286,7 @@ class User:
 
         return round((0.5 * weighted_avg + 0.3 * genre_match_index + 0.1 * episode_rating + 0.1 * date_score), 2) * 10
 
-    def calculate_episode_rating(self, anime) -> float:
+    def calculate_episode_rating(self, anime: Anime) -> float:
         """Calulcates a normalized score for the number of standard deviations an anime is away from the
         users avereage length.
         Preconditions
@@ -267,15 +326,15 @@ class User:
 
 
 if __name__ == '__main__':
-    # import doctest
-    #
-    #
-    # doctest.testmod(verbose=True)
-    # python_ta.check_all(config={
-    #     'extra-imports': ['graph', 'typing', 'datetime', 're'],  # the names (strs) of imported modules
-    #     'allowed-io': ['import_profile', 'save_profile'],  # the names (strs) of functions that call print/open/input
-    #     'max-line-length': 120
-    # })
+    import doctest
+
+    doctest.testmod(verbose=True)
+    python_ta.check_all(config={
+        'extra-imports': ['graph', 'typing', 'datetime', 're'],
+        'allowed-io': ['import_profile', 'save_profile'],
+        'disable': ['too-many-nested-blocks', 'too-many-instance-attributes', 'too-many-arguments'],
+        'max-line-length': 120
+    })
     date1 = datetime.date(2000, 10, 1)
     date2 = datetime.date(2005, 10, 1)
     a = g.read_file([
@@ -283,11 +342,5 @@ if __name__ == '__main__':
         'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
         'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
 
-    # favorite_animes = {a.animes[1]}
-    # friends_list = [a.users['Rollie-Chan']]
-    # priorities = {'story': 8, 'animation': 7, 'sound': 5, 'character': 6}
-    # reviews = {a.animes[1]: [7, 4, 5, 8, 7, 7]}
-    # d = User('dave', favorite_animes, (date1, date2), reviews, priorities, friends_list)
     g.import_profile('dave.csv', a)
     d = a.users['dave']
-    # a.insert_user(d)

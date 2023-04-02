@@ -1,3 +1,11 @@
+"""
+CSC111 Project: Dataset Formatting Functions
+
+This module contains functions to prep chosen dataset csv file for use in the main algorithm
+by editing the information contained. 
+
+This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
+"""
 import calendar
 import csv
 import re
@@ -7,9 +15,14 @@ from typing import Any, List, Tuple
 # when recompiling, use reviews(accidentally edited).csv, profiles.csv, and animes.csv
 # (use the files that I provided since i removed a bunch of entries and columns)
 
-#recompile order: read_and_write_animes. read_and_write_profiles, read_and_write_reviews, and then run the duplicate clearers any way
+# recompile order: read_and_write_animes. read_and_write_profiles, read_and_write_reviews, \
+# and then run the duplicate clearers any way
+
 
 def read_uids() -> list:
+    """A function that reads a csv file containing pre-flagged anime uids.
+    Function returns a list of uids to remove.
+    """
     uids = []
     with open(f"data/uids_to_remove.csv", 'r') as reader:
         line = reader.readline()
@@ -18,16 +31,32 @@ def read_uids() -> list:
             line = reader.readline()
     return uids
 
+
 uids_to_remove = read_uids()
 anime_uids_added = []
-def vet_user(user: str):
+
+
+def vet_user(user: str) -> bool:
+    """ A function that returns True if the user's name is appropriate.
+    User is appropriate if their username does not contain any of a chosen list of keywords.
+    If the user's name contains a keyword, the function returns False.
+    """
     user = user.lower()
     keywords = ['nigger', 'nigga', 'retard', 'faggot', 'fag', 'pedo', 'racist', 'chink', 'fuck', 'bitch', 'whore',
                 'skank', 'wanker', 'bastard', 'dyke', 'asshole', 'dick', 'lolicon', 'fap']
     return not any(keyword in user for keyword in keywords)
 
 
-def read_and_write_reviews():
+def read_and_write_reviews() -> None:
+    """Function that writes a separate 'formatted_reviews.csv' file to contain the original dataset's information,
+    but with flagged inappropriate users in uids_to_remove removed.
+    The csv file will contain information on reviews with...
+    The first column being uid(user who made the review),
+    The second column will be anime id(anime being reviewed), 
+    The third column is the anime's overall rating(out of 10),
+    And the following are the ratings for the anime in each category on MyAnimeList
+    (ex. {'Overall': '8', 'Story': '8', 'Animation': '8', 'Sound': '10', 'Character': '9', 'Enjoyment': '8'})
+    """
     big_lines = []
     # index 0 is uid, 1 is anime id, 2 is overall rating, and then the rest are the ratings for each category
     # (ex. {'Overall': '8', 'Story': '8', 'Animation': '8', 'Sound': '10', 'Character': '9', 'Enjoyment': '8'})
@@ -43,7 +72,7 @@ def read_and_write_reviews():
             cond1 = lines[1] not in uids_to_remove
             cond2 = vet_user(lines[0])
             try:
-                if (cond1 and cond2):
+                if cond1 and cond2:
                     for i in range(3, 9):
                         lines[i] = re.search(r'\d+', lines[i]).group()
 
@@ -63,7 +92,11 @@ def read_and_write_reviews():
 
 # don't limit the amount here
 # people without reviews will still be in the csv file, they'll just only have a username
-def read_and_write_profiles():
+def read_and_write_profiles() -> None:
+    """A function that writes a separate profiles_formatted.csv file to contain an updated 
+    selection of users.
+    Only users that have appropriate names will be added to the new file.
+    """
     big_lines = []
     # idx 1 username, idx 2 onwards favorite anime
     with open(f"data/original_data/profiles.csv", 'r', encoding="utf-8") as reader:
@@ -73,23 +106,23 @@ def read_and_write_profiles():
             lines = line.split(',')
             cond2 = vet_user(lines[0])
             try:
-                if (cond2):
+                if cond2:
                     for i in range(1, len(lines)):
-                        if (lines[i] == '[]\n'):
+                        if lines[i] == '[]\n':
                             lines[i] = ''
                         else:
                             lines[i] = re.search(r'\d+', lines[i]).group()
-                        if (lines[i] in uids_to_remove or lines[i] not in anime_uids_added):
+                        if lines[i] in uids_to_remove or lines[i] not in anime_uids_added:
                             lines[i] = ''
                 # removing blank indices
                 stuff_to_remove = []
                 for i in range(len(lines)):
                     if lines[i] == '':
                         stuff_to_remove.append(lines[i])
-                while stuff_to_remove != []:
+                while stuff_to_remove:  # CHANGED THIS FOR STYLE, BUT IT STILL MEANS 'while stuff_to_remove != []'
                     lines.remove(stuff_to_remove.pop())
 
-                if (cond2):
+                if cond2:
                     big_lines.append(lines)
             except AttributeError:
                 pass
@@ -104,7 +137,10 @@ def read_and_write_profiles():
 
 
 # don't limit the amount here
-def read_and_write_animes():
+def read_and_write_animes() -> None:
+    """A function that reads animes from the original dataset and 
+    writes animes_formatted.csv to only include appropriate anime.
+    """
     # idx 1 is anime id, idx2 is title, next idxs are genres til dates, start dates first, end date second, last idx is
     # episodes
     big_lines = []
@@ -116,7 +152,7 @@ def read_and_write_animes():
             cond1 = lines[0] not in uids_to_remove
 
             try:
-                if (cond1):
+                if cond1:
                     # fixing genres
                     anime_uids_added.append(lines[0])
                     i = 2
@@ -129,7 +165,7 @@ def read_and_write_animes():
                     for j in range(start_idx, end_idx + 1):
                         genre = ''
                         for char in lines[j]:
-                            if (char.isalpha()):
+                            if char.isalpha():
                                 genre += char
                         lines[j] = genre
 
@@ -141,13 +177,13 @@ def read_and_write_animes():
                         months = {month: index for index, month in enumerate(calendar.month_abbr) if month}
                         start_date_numbers = re.findall(r'\b\d+\b', lines[end_idx + 1])
                         end_date_numbers = re.findall(r'\b\d+\b', lines[end_idx + 2])
-                        if(len(end_date_numbers) != 2 or len(start_date_numbers) != 1):
+                        if len(end_date_numbers) != 2 or len(start_date_numbers) != 1:
                             uids_to_remove.append(lines[0])
                             raise AttributeError
                         start_date = str(months[lines[end_idx + 1][1:4]]) + '/' + start_date_numbers[0] \
-                                     + '/' + end_date_numbers[0]
+                            + '/' + end_date_numbers[0]
                         end_date = str(months[lines[end_idx + 2][9:12]]) + '/' + end_date_numbers[1] \
-                                   + '/' + lines[end_idx + 3][1:5]
+                            + '/' + lines[end_idx + 3][1:5]
 
                         lines[end_idx + 4] = re.search(r'\d+', lines[end_idx + 4]).group()
                         lines[end_idx + 1] = start_date
@@ -158,7 +194,7 @@ def read_and_write_animes():
             except AttributeError:
                 pass
 
-            # if (cond1):
+            # if cond1:
             #     big_lines.append(lines)
             line = reader.readline()
 
@@ -171,7 +207,7 @@ def remove_anime_duplicates() -> list[tuple[str]]:
     """Removes the duplicate anime in the csv.
 
     Note:
-    You have to return tuples here to avoid a hashing error when converting a nested list to a set
+    Must return tuples here to avoid a hashing error when converting a nested list to a set.
     """
     with open(f"data/formatted/animes_formatted.csv", 'r', errors="ignore",
               encoding='utf-8') as read_obj:
@@ -183,7 +219,7 @@ def remove_anime_duplicates() -> list[tuple[str]]:
 
 
 def write_anime_no_duplicates() -> None:
-    """Write to a new file of the anime after having removed the duplicates"""
+    """Write to a new file of the anime after having removed the duplicates."""
     animes = remove_anime_duplicates()
     with open(f"data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv",
               'w', newline='',
@@ -203,10 +239,10 @@ def write_anime_no_duplicates() -> None:
 
 def remove_review_duplicates() -> list[tuple[str]]:
     """Removes the duplicate reviews in the csv.
-    Also removes reviews of anime called #NAME? (was probably some error in the csv when using excel)
+    Also removes reviews of anime called #NAME? (due to errors in the csv when using excel).
 
     Note:
-    You have to return tuples here to avoid a hashing error when converting a nested list to a set
+    Must return tuples here to avoid a hashing error when converting a nested list to a set.
     """
     with open(f"data/formatted/formatted_reviews.csv", 'r', errors="ignore") as read_obj:
         csv_reader = csv.reader(read_obj)
@@ -218,7 +254,7 @@ def remove_review_duplicates() -> list[tuple[str]]:
 
 
 def write_review_no_duplicates() -> None:
-    """Write to a new file of the reviews after having removed the duplicates
+    """Write to a new file of the reviews after having removed the duplicates.
     """
     reviews = remove_review_duplicates()
     with open(f"data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv",
@@ -231,10 +267,10 @@ def write_review_no_duplicates() -> None:
 
 def remove_user_duplicate() -> list[tuple[str]]:
     """Removes the duplicate users in the csv.
-    Added: filtering users on their usernames with new keywords
+    Added: filtering users on their usernames with new keywords.
 
     Note:
-    You have to return tuples here to avoid a hashing error when converting a nested list to a set
+    Must return tuples here to avoid a hashing error when converting a nested list to a set.
     """
     with open(f"data/formatted/profiles_formatted.csv", 'r', errors="ignore") as read_obj:
         csv_reader = csv.reader(read_obj)
@@ -245,7 +281,7 @@ def remove_user_duplicate() -> list[tuple[str]]:
 
 
 def write_profiles_no_duplicates() -> None:
-    """Write to a new file of the profiles after having removed the duplicates
+    """Write to a new file of the profiles after having removed the duplicates.
     """
     profiles = remove_user_duplicate()
     with open(f"data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
@@ -258,7 +294,7 @@ def write_profiles_no_duplicates() -> None:
 
 def fix_inconsistent_users() -> tuple[list[Any], list[Any]]:
     """Returns a tuple where index 0 and 1 are all reviews and profiles that have users that are both in the profiles
-    and reviews data sets respectively
+    and reviews data sets respectively.
     """
     with open(f"data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv",
               'r',
@@ -285,7 +321,7 @@ def fix_inconsistent_users() -> tuple[list[Any], list[Any]]:
 
 def write_consistent_users() -> None:
     """Rewrite the profiles and reviews excluding the reviews and profiles of users that aren't present in both data
-    sets
+    sets.
 
     Also takes a while if you run it just be patient :)
     """

@@ -19,7 +19,11 @@ Colour = tuple[int, int, int]
 
 game_state = 'main'
 
-rec_graph = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+rec_graph = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 
+                       'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/\
+                       profiles_formatted_no_duplicates.csv', 
+                       'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/\
+                       reviews_formatted_no_duplicates.csv'])
 
 # Screen Constants
 # 46, 81, 162
@@ -120,8 +124,8 @@ def get_user(username: str) -> None:
 
 
 def add_anime(anime_name: int, ratings: list[int]) -> None:
-    global user
     """Add anime review to user"""
+    global user
     anime = rec_graph.animes[anime_name]
     overall = sum(ratings) // 5
     ratings.append(overall)
@@ -147,6 +151,8 @@ def fill_img(image: pygame.Surface, colour: Colour) -> None:
 def draw_top_bar(screen: pygame.Surface,
                  background_colour: tuple[int, int, int],
                  height_percentage: float) -> None:
+    """Draws the top bar of the pygame screen.
+    """
     height = screen.get_height() * height_percentage
     width = screen.get_width()
     top_bar_rect = pygame.Rect((0, 0), (width, height))
@@ -154,6 +160,8 @@ def draw_top_bar(screen: pygame.Surface,
 
 
 def draw_account_button(screen: pygame.Surface) -> Button:
+    """Draws the account button of the pygame screen.
+    """
     back_arrow = pygame.image.load('ui/arrow-back-32x32.png')
     fill_img(back_arrow, BACK_ARROW_COLOUR)
     account_button = Button(screen,

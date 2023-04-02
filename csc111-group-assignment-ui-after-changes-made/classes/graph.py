@@ -1,6 +1,9 @@
 """
+CSC111 Project: Review and ReccomenderGraph classes, and Corresponding Mutating Functions
+
 This module contains the classes and functions relevant to creating and loading a reccomender tree and saving
 and writing user profiles.
+
 This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """
 from __future__ import annotations
@@ -84,10 +87,12 @@ class ReccomenderGraph:
         # remember case where the anime only has 1 review (add a check for it)
         # take the result from the helper in User and for each path, calculate its path score
         # TODO IMPORTANT remember to remove the animes that the user's already watched from the reccomendations
-        #remember to sort the output before returning using sorted(list_to_sort, key=lambda x: x[1]) (should sort by the scores)
+        # remember to sort the output before returning using sorted(list_to_sort, key=lambda x: x[1])
+        # (should sort by the scores)
         raise NotImplementedError
 
-    # calc_path_scores should take a list of reviews since to calculate the path score we need to average the ratings on each path
+    # calc_path_scores should take a list of reviews since to calculate the path score we need to average...
+    # the ratings on each path
     # weighted by the user's preferences
     def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path
@@ -107,7 +112,7 @@ def tag_keywords_and_strip(query: str) -> set[str]:
             - any(word not in connecting_words for word in re.sub('[^0-9a-zA-z@]+', ' ', query).split(' '))
     """
     # re.sub works by subbing anything not in the range of the character ranges provided with the second param
-    # the plus after the list brackets are to remove repetition of anything in the set of characters after the first match
+    # the plus after the list brackets remove repetition of anything in the set of characters after the first match
     # the caret is used to tell the regex to match any characters that are not in this set
     query_cleaned = re.sub('[^0-9a-zA-z@]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
@@ -145,12 +150,14 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
             anime_tags = graph.animes[anime].get_tags()
             if len(anime_tags) < len(query_tags):
                 if len(query_tags.intersection(anime_tags)) == len(anime_tags):
-                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
+                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] \
+                    # = graph.animes[anime]
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
                     searched = True
             if not searched:
                 if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.4:
-                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] = graph.animes[anime]
+                    # search_res[f'{graph.animes[anime].get_title()}, {graph.animes[anime].get_uid()}'] \
+                    # = graph.animes[anime]
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
             searched = False
     except ZeroDivisionError:
@@ -165,7 +172,10 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
 
 
 # read files in this order: anime, user, reviews
-# files: ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv']
+# files: \
+# ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', \
+# 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv'\
+# , 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv']
 # TODO may be an error here where some users aren't read in, if there are any errors in the future investigate this
 def read_file(files: list[str]) -> ReccomenderGraph:
     """Creates a ReccomenderGraph given the animes. profiles, and reviews formatted in a CSV file in the format:
@@ -320,12 +330,11 @@ def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
         else:
             date = None
             
-
         line = reader.readline()
         if line != '' or line != '\n':
             lines = line.split(',')
             priority = {'story': int(lines[0]), 'animation': int(lines[1]), 'sound': int(lines[2]),
-                    'character': int(lines[3])}
+                        'character': int(lines[3])}
         else:
             priority = None
 
@@ -343,10 +352,8 @@ def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
         else:
             reviews = None
 
-
         user = aau.User(username, favorite_animes, date, reviews, priority, friends)
         return user
-        
         
         
 # write reviews in as anime id, ratings alternating for every review so can read back in and access the animes by ids
@@ -378,7 +385,7 @@ def save_profile(user: aau.User, file_name: str) -> None:
 
         if user.priorities != {}:
             writer.write(f"{user.priorities['story']},{user.priorities['animation']},{user.priorities['sound']},"
-                        f"{user.priorities['character']}\n")
+                         f"{user.priorities['character']}\n")
         else: 
             writer.write("\n")
             
@@ -400,7 +407,10 @@ if __name__ == '__main__':
     # })
     # TODO remove this before submission
 
-    # a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+    # a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_\
+    # no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_\
+    # formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed\
+    # /reviews_formatted_no_duplicates.csv'])
     # with open(
     #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
     #         "r", newline='', encoding="utf-8") as reader:
@@ -414,7 +424,8 @@ if __name__ == '__main__':
     #         line = reader.readline()
     #
     # with open(
-    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv",
+    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_\
+    #         duplicates.csv",
     #         "r", newline='', encoding="utf-8") as reader:
     #     line = reader.readline()
     #     while line != '':

@@ -1,4 +1,12 @@
-import pygame, sys
+"""
+CSC111 Project: Main Program
+
+This module contains the necessary code to run the program from start to finish.
+
+This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
+"""
+import pygame
+import sys
 from ui.ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, Button, AirDateFilterDisplay, Text, InputBox2, DropDown2
 from classes.anime_and_users import Anime, User
 from classes.graph import ReccomenderGraph, read_file, save_profile, import_profile, import_profile_to_user, Review

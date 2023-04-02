@@ -13,8 +13,6 @@ import python_ta
 import anime_and_users as aau
 
 
-# a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
-
 class Review:
     """An edge that connects a user and an anime which contains the ratings the user gave
 
@@ -79,7 +77,6 @@ class ReccomenderGraph:
         self.users[user].friends_list.append(self.users[friend_user])
         self.users[friend_user].friends_list.append(self.users[user])
 
-    # float is path score between 0 - 10 (actual path score avgd with the similarity)
     def get_all_path_scores(self, user: aau.User) -> list[tuple[aau.Anime, float]]:
         """Find all anime at a path length of 3 and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores

@@ -16,9 +16,6 @@ import python_ta
 import graph as g
 
 
-# IMPORTANT: parameter for the number of episodes in user.priorities should be written as 'num-episodes'
-# when refeeding reviews, for the user recalculate the genre match using the provided function.
-
 class Anime:
     """A class representing a anime node in the ReccomenderTree
 
@@ -149,12 +146,10 @@ class User:
     favorite_animes: set[Anime]
     matching_genres: set[str]
     friends_list: list[User]
-    # TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'num-episodes')
     priorities: dict[str, int]
     weights: dict[str, float]
     favorite_era: tuple[datetime.date, datetime.date]
 
-    # TODO IMPORTANT: the keys in the input for priorities should be ('story', 'animation', 'sound', 'character')
     def __init__(self, username: str, fav_animes: set[Anime],
                  favorite_era: Optional[tuple[datetime.date, datetime.date]] = None,
                  review: Optional[dict[Anime, list[int]]] = None, priority: Optional[dict[str, int]] = None,

@@ -1,6 +1,9 @@
 """
+CSC111 Project: Anime and User classes
+
 This module contains the classes and functions relevant to the User and Anime classes
 and calculating the similarity score for Animes.
+
 This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """
 from __future__ import annotations
@@ -112,15 +115,16 @@ class User:
     favorite_animes: set[Anime]
     matching_genres: set[str]
     friends_list: list[User]
-    # priorities contains all of the categories of a review ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall') and an
+    # priorities contains all of the categories of a review:
+    # ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall') and an...
     # average of the amount of episodes from the user's favorite anime to get their preferred amount of episodes
     # TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'num-episodes')
     priorities: dict[str, int]
     weights: dict[str, float]
     favorite_era: tuple[datetime.date, datetime.date]
 
-    # reviews, priorities, and friends_list are optional since they could be loaded in from a users csv file, the regular
-    # database users don't have these properties
+    # reviews, priorities, and friends_list are optional since they could be loaded in from a users csv file, 
+    # the regular database users don't have these properties
     # TODO IMPORTANT: the keys in the input for priorities should be ('story', 'animation', 'sound', 'character')
     # when passing in reviews, make sure the lists are in the order ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall')
     def __init__(self, username: str, fav_animes: set[Anime],
@@ -277,9 +281,12 @@ if __name__ == '__main__':
     date1 = datetime.date(2000, 10, 1)
     date2 = datetime.date(2005, 10, 1)
     a = g.read_file([
-        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv',
-        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
-        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted\
+        _no_duplicates.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted\
+        _no_duplicates.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted\
+        _no_duplicates.csv'])
 
     # favorite_animes = {a.animes[1]}
     # friends_list = [a.users['Rollie-Chan']]

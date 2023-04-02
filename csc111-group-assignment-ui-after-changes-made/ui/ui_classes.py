@@ -1,4 +1,10 @@
-""" UI Elements """
+""" 
+CSC111 Project: UI Classes
+
+This module contains the classes defined for the purposes of the user interface.
+
+This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla. 
+"""
 
 from typing import Optional
 
@@ -25,13 +31,15 @@ class Button:
     _border_colour: Optional[Colour]
     _border_radius: int
     image: pygame.Surface
-    font_style: str
+    font_style: Optional[str]
     _is_centered_text: bool
 
     def __init__(self, screen: pygame.surface, height: Coord, width: Coord, position: Position, text: str,
                  colour: Colour, hover_colour: Colour, text_colour: Colour, font_style: Optional[str] = None,
                  border_colour: Optional[Colour] = None,
                  border_radius: int = 0, image: Optional[pygame.Surface] = None, is_centered_text: bool = True) -> None:
+        """ Initialize a new Button object.
+        """
         self._screen = screen
         self._height = height
         self._width = width
@@ -54,6 +62,8 @@ class Button:
         self._is_centered_text = is_centered_text
 
     def draw(self) -> None:
+        """ Draw a button object in a pygame window.
+        """
         btn_rect = pygame.Rect(self.position, (self._width, self._height))
         pygame.draw.rect(self._screen, self._current_colour, btn_rect, border_radius=self._border_radius)
         if self._border_colour is not None:
@@ -84,6 +94,9 @@ class Button:
         return is_hover_y and is_hover_x
 
     def update_colour(self, mouse_pos) -> bool:
+        """Return whether the button's colour has changed based on the position of the mouse
+        and whether it is hovering.
+        """
         if self._is_hovered(mouse_pos):
             self._current_colour = self._hover_colour
             r_val = True
@@ -117,6 +130,8 @@ class FivePointGraph:
                  size: Coord, position: Position, colour_one: Colour,
                  colour_two: Colour, dot_colour: Colour, line_colour: Colour,
                  graph_colour: tuple[int, int, int, int], rating_alpha: int, font_style: str) -> None:
+        """Initialize a FivePointGraph object.
+        """
         self.screen = screen
         self.ratings = ratings
         self._size = size
@@ -129,7 +144,11 @@ class FivePointGraph:
         self.rating_alpha = rating_alpha
         self.font_style = font_style
 
-    def draw(self):
+    def draw(self) -> None:
+        """Draw the FivePointGraph as a graph in pygame, 
+        displaying anime ratings.
+        """
+        
         radius = self._size / 2
 
         # Draw the empty graph
@@ -152,6 +171,8 @@ class FivePointGraph:
                                     legend_points[i][1]))
 
     def update(self, ratings: list[int]) -> None:
+        """Update the drawn graph with the given list of ratings.
+        """
         self.draw()
         print(ratings)
         # Draw the anime's rating
@@ -214,6 +235,8 @@ class FivePointGraph:
 
 
 class AnimeSpotlight:
+    """A class that represents a recommended anime.
+    """
     screen: pygame.Surface
     background_colour: Colour
     position: Position
@@ -233,7 +256,9 @@ class AnimeSpotlight:
                  top_bar_height_percentage: float, width_percentage: float,
                  anime_colour: Colour, colour_one: Colour, colour_two: Colour,
                  dot_colour: Colour, line_colour: Colour, graph_colour: tuple[int, int, int, int], rating_alpha: int,
-                 font_style: str, title_font_size: int):
+                 font_style: str, title_font_size: int) -> None:
+        """Initialize an AnimeSpotlight object.
+        """
         self.screen = screen
         self.background_colour = background_colour
         self.position = (20, screen.get_height() * top_bar_height_percentage)
@@ -260,19 +285,25 @@ class AnimeSpotlight:
         self.curr_font_size = self.font_size
         self.title_font = pygame.font.SysFont(font_style, self.font_size, bold=False)
 
-    def draw(self):
+    def draw(self) -> None:
+        """Draw the AnimeSpotlight object in pygame.
+        """
         anime_spotlight_rect = pygame.Rect(self.position, (self.width, self.height))
         pygame.draw.rect(self.screen, self.background_colour, anime_spotlight_rect)
         self.graph.draw()
 
-    def redraw(self):
+    def redraw(self) -> None:
+        """ Redraw the AnimeSpotlight object with the rating order.
+        """
         self.draw()
         self.format_and_display_title()
         rating_order = ['overall', 'animation', 'sound', 'character', 'enjoyment', 'story']
         ratings = [self.ratings[rating_order[i]] for i in range(6)]
         self.graph.update(ratings)
 
-    def update(self, anime: Anime):
+    def update(self, anime: Anime) -> None:
+        """Update the AnimeSpotlight object with the rating order.
+        """
         self.anime = anime._title
         # self.ratings = list(anime.ratings.values()) Use this if ratings attribute is a dict
         self.ratings = anime.calculate_average_ratings()
@@ -282,7 +313,9 @@ class AnimeSpotlight:
         ratings = [self.ratings[rating_order[i]] for i in range(6)]
         self.graph.update(ratings)
 
-    def format_and_display_title(self):
+    def format_and_display_title(self) -> None:
+        """Formats and displays title according to attributes of object.
+        """
         self.title_font = pygame.font.SysFont(self.font_style, self.font_size, bold=False)
         formatted_lines = self.format_title_lines()
         self.adjust_font_size(formatted_lines)

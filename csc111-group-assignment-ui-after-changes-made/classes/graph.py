@@ -1,6 +1,7 @@
 """
 This module contains the classes and functions relevant to creating and loading a reccomender tree and saving
 and writing user profiles.
+
 This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """
 from __future__ import annotations
@@ -9,13 +10,12 @@ import re
 
 import python_ta
 
-import classes.anime_and_users as aau
+import anime_and_users as aau
 
-
-# a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
 
 class Review:
     """An edge that connects a user and an anime which contains the ratings the user gave
+
     Instance Attributes
     - endpoints: The two nodes linked by this review
     - ratings: the ratings that the user gave for the individual categories
@@ -39,6 +39,7 @@ class Review:
 
 class ReccomenderGraph:
     """A class for a graph of nodes, where the nodes are users and animes, and edges are reviews
+
     Instance Attributes
     - users: a list of user nodes
     - animes: a list of anime nodes
@@ -76,7 +77,6 @@ class ReccomenderGraph:
         self.users[user].friends_list.append(self.users[friend_user])
         self.users[friend_user].friends_list.append(self.users[user])
 
-    # float is path score between 0 - 10 (actual path score avgd with the similarity)
     def get_all_path_scores(self, user: aau.User) -> list[tuple[aau.Anime, float]]:
         """Find all anime at a path length of 3 and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
@@ -84,7 +84,6 @@ class ReccomenderGraph:
             - depth >= 2
             - user in self.users
         """
-
         watched_animes = user.favorite_animes.union({ani for ani in user.reviews})
         paths = [pa for pa in user.get_all_path_scores_helper(0, [], list(watched_animes)) if len(pa) > 2]
         scores = []
@@ -129,8 +128,7 @@ def tag_keywords_and_strip(query: str) -> set[str]:
     """
     query_cleaned = re.sub('[^0-9a-zA-z@]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
-    connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', '1st', '2nd', '3rd', 'first', 'second', 'third',
-                        'season', 'ova', 'kun', 'a', '1', '2', '3']
+    connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', 'ova', 'kun', 'a']
     cleaned_query_keywords = set()
     for keyword in query_keywords:
         if keyword.lower() in connecting_words or keyword in ('', '\n'):
@@ -159,7 +157,7 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
                     searched = True
             if not searched:
-                if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.4:
+                if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.5:
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
             searched = False
     except ZeroDivisionError:
@@ -241,8 +239,7 @@ def read_file(files: list[str]) -> ReccomenderGraph:
     return graph
 
 
-
-def import_profile(file: str, graph: ReccomenderGraph) -> None:
+def import_profile(file: str, graph: ReccomenderGraph) -> aau.User:
     """loads a user from a csv file and adds them into the graph
     Preconditions:
         - files are formatted correctly
@@ -286,9 +283,9 @@ def import_profile(file: str, graph: ReccomenderGraph) -> None:
 
             reviews[graph.animes[int(lines[0])]] = ratings_int
             line = reader.readline()
-
-        graph.insert_user(aau.User(username, favorite_animes, (date1, date2), reviews, priority, friends))
-
+        u = aau.User(username, favorite_animes, (date1, date2), reviews, priority, friends)
+        graph.insert_user(u)
+        return u
 
 def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
     """loads a user from a csv file and adds them into the graph
@@ -325,7 +322,7 @@ def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
             date = (date1, date2)
         else:
             date = None
-            
+
 
         line = reader.readline()
         if line != '' or line != '\n':
@@ -352,19 +349,14 @@ def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
 
         user = aau.User(username, favorite_animes, date, reviews, priority, friends)
         return user
-        
-        
-        
-# write reviews in as anime id, ratings alternating for every review so can read back in and access the animes by ids
-# and create new reviews
+
+
 def save_profile(user: aau.User, file_name: str) -> None:
     """save the user's profile into a csv file
     Preconditions:
         - user is a valid User object
     """
-    f = open(file_name, "w+")
-    f.close()
-    with open(file_name, 'a', encoding='utf-8') as writer:
+    with open(file_name, 'w', encoding='utf-8') as writer:
         writer.write(f"{user.username},\n")
 
         for anime in user.favorite_animes:
@@ -375,19 +367,12 @@ def save_profile(user: aau.User, file_name: str) -> None:
             writer.write(f"{friend.username},")
         writer.write('\n')
 
-        if user.favorite_era != ():
-            writer.write(f"{user.favorite_era[0].month}/{user.favorite_era[0].day}/{user.favorite_era[0].year},")
-            writer.write(f"{user.favorite_era[1].month}/{user.favorite_era[1].day}/{user.favorite_era[1].year},\n")
-        else:
-            writer.write("\n")
-            writer.write("\n")
+        writer.write(f"{user.favorite_era[0].month}/{user.favorite_era[0].day}/{user.favorite_era[0].year},")
+        writer.write(f"{user.favorite_era[1].month}/{user.favorite_era[1].day}/{user.favorite_era[1].year},\n")
 
-        if user.priorities != {}:
-            writer.write(f"{user.priorities['story']},{user.priorities['animation']},{user.priorities['sound']},"
-                        f"{user.priorities['character']}\n")
-        else: 
-            writer.write("\n")
-            
+        writer.write(f"{user.priorities['story']},{user.priorities['animation']},{user.priorities['sound']},"
+                     f"{user.priorities['character']}\n")
+
         for review in user.reviews:
             rating = user.reviews[review].ratings
             writer.write(f"{review.get_uid()},{rating['story']},{rating['animation']},{rating['sound']},"
@@ -398,33 +383,9 @@ if __name__ == '__main__':
     import doctest
 
     doctest.testmod(verbose=True)
-    # python_ta.check_all(config={
-    #     'extra-imports': ['anime_and_users', 'datetime', 're'],  # the names (strs) of imported modules
-    #     'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search'],
-    #     # the names (strs) of functions that call print/open/input
-    #     'max-line-length': 120
-    # })
-    # TODO remove this before submission
-
-    # a = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
-    # with open(
-    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv",
-    #         "r", newline='', encoding="utf-8") as reader:
-    #     line = reader.readline()
-    #     while line != '':
-    #         lines = line.split(',')
-    #         if lines[0][-1] == '\n' or lines[0][-1] == '':
-    #             lines[0] = lines[0][0:-1]
-    #         if lines[0] not in a.users:
-    #             print(lines[0])
-    #         line = reader.readline()
-    #
-    # with open(
-    #         f"csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv",
-    #         "r", newline='', encoding="utf-8") as reader:
-    #     line = reader.readline()
-    #     while line != '':
-    #         lines = line.split(',')
-    #         if int(lines[0]) not in a.animes:
-    #             print(lines[0])
-    #         line = reader.readline()
+    python_ta.check_all(config={
+        'extra-imports': ['anime_and_users', 'datetime', 're'],
+        'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search'],
+        'disable': ['too-many-nested-blocks', 'too-many-locals'],
+        'max-line-length': 120
+    })

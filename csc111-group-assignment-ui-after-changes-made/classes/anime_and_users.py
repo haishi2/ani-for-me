@@ -1,6 +1,9 @@
 """
+CSC111 Project: Anime and User classes
+
 This module contains the classes and functions relevant to the User and Anime classes
 and calculating the similarity score for Animes.
+
 This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """
 from __future__ import annotations
@@ -10,14 +13,12 @@ from typing import Optional
 
 import python_ta
 
-import classes.graph as g
+import graph as g
 
-
-# IMPORTANT: parameter for the number of episodes in user.priorities should be written as 'num-episodes'
-# when refeeding reviews, for the user recalculate the genre match using the provided function.
 
 class Anime:
     """A class representing a anime node in the ReccomenderTree
+
     Private Instance Attributes
     - title: the title of the anime
     - num_episodes: the number of episodes the anime has
@@ -145,17 +146,10 @@ class User:
     favorite_animes: set[Anime]
     matching_genres: set[str]
     friends_list: list[User]
-    # priorities contains all of the categories of a review ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall') and an
-    # average of the amount of episodes from the user's favorite anime to get their preferred amount of episodes
-    # TODO IMPORTANT: the keys are ('story', 'animation', 'sound', 'character', 'num-episodes')
     priorities: dict[str, int]
     weights: dict[str, float]
     favorite_era: tuple[datetime.date, datetime.date]
 
-    # reviews, priorities, and friends_list are optional since they could be loaded in from a users csv file, the regular
-    # database users don't have these properties
-    # TODO IMPORTANT: the keys in the input for priorities should be ('story', 'animation', 'sound', 'character')
-    # when passing in reviews, make sure the lists are in the order ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall')
     def __init__(self, username: str, fav_animes: set[Anime],
                  favorite_era: Optional[tuple[datetime.date, datetime.date]] = None,
                  review: Optional[dict[Anime, list[int]]] = None, priority: Optional[dict[str, int]] = None,
@@ -163,7 +157,7 @@ class User:
         """intialize a new user and calculate their priority weights
         Preconditions:
             - (favorite era[1] - favorite_era[0]).days > 0
-            - all(priority[p] >= 0 for p in proirity)
+            - all(priority[p] >= 0 for p in priority)
             - all(all(rating >= 0 for rating in review[anime]) for anime in review
             - len({anime for anime in review}) == len(review)
             - len(set(friend_list)) == len(friend_list)
@@ -306,9 +300,9 @@ class User:
             deviations_distance = (anime.get_num_episodes() - mid) / stddev
             return 1 - (deviations_distance / max_std_deviations_r)
 
-    def reccomend_based_on_friends(self) -> dict[Anime: float]:
-        """Reccomend anime based on what the user's friends have watched. If the user has no friends, return an empty
-        dict.
+    def reccomend_based_on_friends(self) -> list:
+        """Reccomend anime based on what the user's friends have watched. If the user has no friends, returns an empty
+        list.
         """
         already_watched = self.favorite_animes.union(self.reviews.keys())
         animes_to_rank = set()
@@ -320,31 +314,28 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-        return scores
+        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
 
 if __name__ == '__main__':
-    # import doctest
-    #
-    #
-    # doctest.testmod(verbose=True)
-    # python_ta.check_all(config={
-    #     'extra-imports': ['graph', 'typing', 'datetime', 're'],  # the names (strs) of imported modules
-    #     'allowed-io': ['import_profile', 'save_profile'],  # the names (strs) of functions that call print/open/input
-    #     'max-line-length': 120
-    # })
+    import doctest
+
+    doctest.testmod(verbose=True)
+    python_ta.check_all(config={
+        'extra-imports': ['graph', 'typing', 'datetime', 're'],
+        'allowed-io': ['import_profile', 'save_profile'],
+        'disable': ['too-many-nested-blocks', 'too-many-instance-attributes', 'too-many-arguments'],
+        'max-line-length': 130
+    })
     date1 = datetime.date(2000, 10, 1)
     date2 = datetime.date(2005, 10, 1)
     a = g.read_file([
-        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv',
-        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
-        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates'
+        '.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed'
+        '/profiles_formatted_no_duplicates.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed'
+        '/reviews_formatted_no_duplicates.csv'])
 
-    # favorite_animes = {a.animes[1]}
-    # friends_list = [a.users['Rollie-Chan']]
-    # priorities = {'story': 8, 'animation': 7, 'sound': 5, 'character': 6}
-    # reviews = {a.animes[1]: [7, 4, 5, 8, 7, 7]}
-    # d = User('dave', favorite_animes, (date1, date2), reviews, priorities, friends_list)
     g.import_profile('dave.csv', a)
     d = a.users['dave']
-    # a.insert_user(d)

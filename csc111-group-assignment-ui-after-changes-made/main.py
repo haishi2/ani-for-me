@@ -2,6 +2,7 @@ import pygame, sys
 from ui.ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, Button, AirDateFilterDisplay, Text, InputBox2, DropDown2
 from classes.anime_and_users import Anime, User
 from classes.graph import ReccomenderGraph, read_file, save_profile, import_profile, import_profile_to_user, Review
+from classes.graph import search
 import datetime
 
 Coord = int | float
@@ -121,7 +122,7 @@ def add_anime(anime_name: int, ratings: list[int]) -> None:
     ratings = {r_type[i]: ratings[i] for i in range(6)}
     review = Review(user, anime, ratings)
     user.reviews[anime] = review
-    
+
     save_user_profile(user)
 #  reviews: dict[Anime, g.Review]
 
@@ -238,8 +239,8 @@ def create_profile(username: str, fav_animes: set[Anime]):
     )
     filename = f"users/{username}.csv"
     save_profile(user, filename)
-    
-    
+
+
 def save_user_profile(user: User):
     filename = f"users/{user.username}.csv"
     save_profile(user, filename)
@@ -262,10 +263,10 @@ def run_reccomendations(screen: pygame.Surface) -> None:
 
     # Import user into graph
     import_profile(f"users/{user.username}.csv", rec_graph)
-    
+
     rec = rec_graph.get_all_path_scores(user)
     rec_anime = [anime[0] for anime in rec]
-    # TODO PUT GENERATION HERE 
+    # TODO PUT GENERATION HERE
     recommendations = recommendation_display.update(rec_anime, anime_spotlight)
 
     while True:
@@ -373,8 +374,8 @@ def run_reccomendations(screen: pygame.Surface) -> None:
 def run_login(screen: pygame.Surface) -> None:
     """ Log-in Page """
     global game_state
-    global curr_user
-    
+    global user
+
     Text(screen, 48, "Ani-4-me", 60, 180).draw()
     Text(screen, 30, "Get a recommendation on what to watch next by adding", 60, 230).draw()
     Text(screen, 30, "some of the animes that you have watched so far. Get", 60, 260).draw()
@@ -402,8 +403,15 @@ def run_login(screen: pygame.Surface) -> None:
         create_btn.update_colour(mouse_pos)
 
         if login_btn.is_clicked(is_clicking, mouse_pos):
-            get_user(username_btn.text)
-            game_state = 'home'
+            try:
+                get_user(username_btn.text)
+                enter_home_menu = True
+            except(FileNotFoundError):
+                username_btn.text = ''
+                enter_home_menu = False
+
+            if(enter_home_menu):
+                game_state = 'home'
 
         if create_btn.is_clicked(is_clicking, mouse_pos):
             game_state = 'sign-in'
@@ -424,11 +432,13 @@ def run_home(screen: pygame.Surface):
     Text(screen, 48, "Ani-4-me", 310, 240).draw()
     rate_btn = Button(screen, 35, 200, (180, 300), "Rate Anime", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
     add_friends = Button(screen, 35, 200, (390, 300), "Add Friends", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
-    get_reccomendations = Button(screen, 35, 410, (180, 350), "Get Reccomendations", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    get_reccomendations = Button(screen, 35, 200, (180, 350), "Get Reccomendations", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    search_for_anime_ids = Button(screen, 35, 200, (390, 350), "Get anime identifiers", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
 
     rate_btn.draw()
     add_friends.draw()
     get_reccomendations.draw()
+    search_for_anime_ids.draw()
 
     while True:
         pygame.display.flip()
@@ -439,6 +449,7 @@ def run_home(screen: pygame.Surface):
         rate_btn.update_colour(mouse_pos)
         add_friends.update_colour(mouse_pos)
         get_reccomendations.update_colour(mouse_pos)
+        search_for_anime_ids.update_colour(mouse_pos)
 
         if rate_btn.is_clicked(is_clicking, mouse_pos):
             game_state = 'rate'
@@ -448,6 +459,9 @@ def run_home(screen: pygame.Surface):
 
         if get_reccomendations.is_clicked(is_clicking, mouse_pos):
             game_state = 'get_rec'
+
+        if search_for_anime_ids.is_clicked(is_clicking, mouse_pos):
+            game_state = 'search'
 
         if any(event.type == pygame.QUIT for event in events):
             pygame.display.quit()
@@ -459,13 +473,14 @@ def run_home(screen: pygame.Surface):
 
 def run_add_friends(screen: pygame.Surface):
     global game_state
-    global curr_user
+    global user
     screen.fill((255, 255, 255))
     Text(screen, 36, "Add Friend", 60, 230).draw()
     Text(screen, 30, "Username:", 60, 300).draw()
     username_btn = InputBox2(175, 295, 400, 32)
     add_friend_btn = Button(screen, 35, 200, (60, 370), "Add Friend", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
     add_friend_btn.draw()
+    account_button = draw_account_button(screen)
 
     while True:
         pygame.display.flip()
@@ -482,9 +497,25 @@ def run_add_friends(screen: pygame.Surface):
         add_friend_btn.update_colour(mouse_pos)
         if add_friend_btn.is_clicked(is_clicking, mouse_pos):
             friend_username = username_btn.text
-            friend_user = get_user(friend_username)
-            curr_user.friends_list.append(friend_user)
+            try:
+                if any(friend_username == friend.username for friend in user.friends_list) \
+                        or friend_username == user.username:
+                    raise KeyError
+                friend_user = rec_graph.users[friend_username]
+                success = True
+            except KeyError:
+                username_btn.text = ''
+                success = False
 
+            if success:
+                user.friends_list.append(friend_user)
+                game_state = 'home'
+
+        if account_button.update_colour(mouse_pos):
+            fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
+        else:
+            fill_img(account_button.image, BACK_ARROW_COLOUR)
+        if account_button.is_clicked(is_clicking, mouse_pos):
             game_state = 'home'
 
         if any(event.type == pygame.QUIT for event in events):
@@ -549,43 +580,17 @@ def run_sign_in(screen: pygame.Surface):
         if game_state != 'sign-in':
             break
 
-
-def run_rate_anime(screen: pygame.Surface):
+def run_search_screen(screen: pygame.surface):
     global game_state
-
-    COLOR_INACTIVE = (217, 217, 217)
-    COLOR_ACTIVE = (46, 81, 162)
-    values = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10']
+    screen.fill((255, 255, 255))
+    Text(screen, 20, "Anime Name:", 90, 30).draw()
+    account_button = draw_account_button(screen)
     anime_name_btn = InputBox2(200, 20, 400, 32)
+    search_button = Button(screen, 32, 70, (630, 20), "search", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
 
-    rank_story_btn = DropDown2([COLOR_INACTIVE, COLOR_ACTIVE],
-                               [COLOR_INACTIVE, COLOR_ACTIVE], 200, 70, 400, 30,
-                               pygame.font.SysFont('dm sans', 20), "Rank Story", values)
-    rank_animation_btn = DropDown2([COLOR_INACTIVE, COLOR_ACTIVE],
-                               [COLOR_INACTIVE, COLOR_ACTIVE], 200, 120, 400, 30,
-                               pygame.font.SysFont('dm sans', 20), "Rank Animation", values)
-    rank_sound_btn = DropDown2([COLOR_INACTIVE, COLOR_ACTIVE],
-                                   [COLOR_INACTIVE, COLOR_ACTIVE], 200, 170, 400, 30,
-                                   pygame.font.SysFont('dm sans', 20), "Rank Sound", values)
-    rank_character_btn = DropDown2([COLOR_INACTIVE, COLOR_ACTIVE],
-                                   [COLOR_INACTIVE, COLOR_ACTIVE], 200, 220, 400, 30,
-                                   pygame.font.SysFont('dm sans', 20), "Rank Character", values)
-    rank_enjoyment_btn = DropDown2([COLOR_INACTIVE, COLOR_ACTIVE],
-                                   [COLOR_INACTIVE, COLOR_ACTIVE], 200, 270, 400, 30,
-                                   pygame.font.SysFont('dm sans', 20), "Rank Enjoyment", values)
-
-    rate_anime_btn = Button(screen, 35, 400, (200, 350), "Rate Anime", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
-    ratings = [0, 0, 0, 0, 0]
-    # TODO
     while True:
-        Text(screen, 20, "Anime Name:", 90, 30).draw()
-        rate_anime_btn.draw()
-        rank_enjoyment_btn.draw(screen)
-        rank_character_btn.draw(screen)
-        rank_sound_btn.draw(screen)
-        rank_animation_btn.draw(screen)
-        rank_story_btn.draw(screen)
-
+        pygame.draw.rect(screen, (255, 255, 255), (175, 295, 400, 32))
+        search_button.draw()
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
@@ -594,38 +599,101 @@ def run_rate_anime(screen: pygame.Surface):
         for event in events:
             anime_name_btn.handle_event(event)
 
+        anime_name_btn.draw(screen)
+
+        if search_button.is_clicked(is_clicking, mouse_pos):
+            res = [anime for anime in search(anime_name_btn.text, rec_graph)]
+            if len(res) >= 10:
+                for i in range(10):
+                    font = pygame.font.SysFont(FONT_STYLE, 30)
+                    text = font.render(f'{res[i]}', True, (0,0,0))
+                    screen.blit(text, (150, 100 + 50 * i))
+            else:
+                for i in range(len(res)):
+                    font = pygame.font.SysFont(FONT_STYLE, 30)
+                    text = font.render(f'{res[i]}', True, (0,0,0))
+                    screen.blit(text, (150, 100 + 50 * i))
+
+        if account_button.update_colour(mouse_pos):
+            fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
+        else:
+            fill_img(account_button.image, BACK_ARROW_COLOUR)
+        if account_button.is_clicked(is_clicking, mouse_pos):
+            game_state = 'home'
+
+        if game_state != 'search':
+            break
+
+def run_rate_anime(screen: pygame.Surface):
+    global game_state
+
+    anime_name_btn = InputBox2(200, 20, 400, 32)
+
+    story_btn = InputBox2(200, 70, 400, 32)
+    animation_btn = InputBox2(200, 120, 400, 32)
+    sound_btn = InputBox2(200, 170, 400, 32)
+    char_btn = InputBox2(200, 220, 400, 32)
+    enjoy_btn = InputBox2(200, 270, 400, 32)
+    overall_btn = InputBox2(200, 320, 400, 32)
+    account_button = draw_account_button(screen)
+
+    rate_anime_btn = Button(screen, 35, 400, (200, 400), "Rate Anime", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    ratings = [0, 0, 0, 0, 0, 0]
+
+    while True:
+        Text(screen, 20, "Anime ID:", 90, 30).draw()
+        Text(screen, 20, "Story (0-10):", 90, 80).draw()
+        Text(screen, 20, "Animation (0-10):", 90, 130).draw()
+        Text(screen, 20, "Sound (0-10):", 90, 180).draw()
+        Text(screen, 20, "Characters (0-10):", 90, 230).draw()
+        Text(screen, 20, "Enjoyment (0-10):", 90, 280).draw()
+        Text(screen, 20, "Overall (0-10):", 90, 330).draw()
+        rate_anime_btn.draw()
+
+        pygame.display.flip()
+        events = pygame.event.get()
+        mouse_pos = pygame.mouse.get_pos()
+        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+
+        for event in events:
+            anime_name_btn.handle_event(event)
+            story_btn.handle_event(event)
+            animation_btn.handle_event(event)
+            sound_btn.handle_event(event)
+            char_btn.handle_event(event)
+            enjoy_btn.handle_event(event)
+            overall_btn.handle_event(event)
+
         rate_anime_btn.update_colour(mouse_pos)
 
         if rate_anime_btn.is_clicked(is_clicking, mouse_pos):
             anime_name = int(anime_name_btn.text)
+            ratings[0] = int(story_btn.text)
+            ratings[1] = int(animation_btn.text)
+            ratings[2] = int(sound_btn.text)
+            ratings[3] = int(char_btn.text)
+            ratings[4] = int(enjoy_btn.text)
+            ratings[5] = int(overall_btn.text)
             add_anime(anime_name, ratings)
             game_state = 'home'
-
-
-        selected_story = rank_story_btn.update(events)
-        if selected_story >= 0:
-            rank_story_btn.main = rank_story_btn.options[selected_story]
-
-        selected_animation = rank_animation_btn.update(events)
-        if selected_animation >= 0:
-            rank_animation_btn.main = rank_animation_btn.options[selected_animation]
-
-        selected_sound = rank_sound_btn.update(events)
-        if selected_sound >= 0:
-            rank_sound_btn.main = rank_sound_btn.options[selected_sound]
-
-        selected_char = rank_character_btn.update(events)
-        if selected_char >= 0:
-            rank_character_btn.main = rank_character_btn.options[selected_char]
-
-        selected_enjoyment = rank_enjoyment_btn.update(events)
-        if selected_enjoyment >= 0:
-            rank_enjoyment_btn.main = rank_enjoyment_btn.options[selected_enjoyment]
 
         screen.fill((255, 255, 255))
 
         pygame.draw.rect(screen, (255, 255, 255), (200, 20, 400, 32))
         anime_name_btn.draw(screen)
+        story_btn.draw(screen)
+        animation_btn.draw(screen)
+        sound_btn.draw(screen)
+        char_btn.draw(screen)
+        enjoy_btn.draw(screen)
+        overall_btn.draw(screen)
+
+        if account_button.update_colour(mouse_pos):
+            fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
+        else:
+            fill_img(account_button.image, BACK_ARROW_COLOUR)
+        if account_button.is_clicked(is_clicking, mouse_pos):
+            game_state = 'home'
 
         if any(event.type == pygame.QUIT for event in events):
             pygame.display.quit()
@@ -667,6 +735,9 @@ def run_project() -> None:
             run_add_friends(screen)
         elif game_state == 'get_rec':
             run_reccomendations(screen)
+        elif game_state == 'search':
+            run_search_screen(screen)
+
 
 
 if __name__ == "__main__":

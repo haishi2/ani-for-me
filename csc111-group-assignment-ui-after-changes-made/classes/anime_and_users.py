@@ -126,7 +126,8 @@ class User:
     # reviews, priorities, and friends_list are optional since they could be loaded in from a users csv file, 
     # the regular database users don't have these properties
     # TODO IMPORTANT: the keys in the input for priorities should be ('story', 'animation', 'sound', 'character')
-    # when passing in reviews, make sure the lists are in the order ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall')
+    # when passing in reviews, make sure the lists are in the order:
+    # ('story', 'animation', 'sound', 'character', 'enjoyment', 'overall')
     def __init__(self, username: str, fav_animes: set[Anime],
                  favorite_era: Optional[tuple[datetime.date, datetime.date]] = None,
                  review: Optional[dict[Anime, list[int]]] = None, priority: Optional[dict[str, int]] = None,
@@ -296,3 +297,4 @@ if __name__ == '__main__':
     g.import_profile('dave.csv', a)
     d = a.users['dave']
     # a.insert_user(d)
+    

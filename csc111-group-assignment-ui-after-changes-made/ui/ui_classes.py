@@ -153,11 +153,10 @@ class FivePointGraph:
 
     def update(self, ratings: list[int]) -> None:
         self.draw()
-        # Update values
-        self.ratings = [ratings[0]] + ratings[2:5] + [ratings[1]]
+        print(ratings)
         # Draw the anime's rating
         radius = self._size / 2
-        relative_rating_graph_points, rating_graph_points = self._get_rating_points(complex(0, - radius))
+        relative_rating_graph_points, rating_graph_points = self._get_rating_points(complex(0, - radius), ratings)
 
         shape_surf = pygame.Surface((self._size, self._size), pygame.SRCALPHA)
         pygame.draw.polygon(shape_surf, self.graph_colour, relative_rating_graph_points)
@@ -174,7 +173,7 @@ class FivePointGraph:
 
         rating_surf = pygame.Surface((self._size, self._size), pygame.SRCALPHA)
         font = pygame.font.SysFont(self.font_style, 64, bold=False)
-        img = font.render(f"{self.ratings[0]}", True, (23, 41, 81))
+        img = font.render(f"{ratings[0]}", True, (23, 41, 81))
         img.set_alpha(self.rating_alpha)
         rating_surf.blit(img, ((rating_surf.get_width() - img.get_width()) / 2,
                                (rating_surf.get_height() - img.get_height()) / 2))
@@ -191,7 +190,7 @@ class FivePointGraph:
             position *= complex(cos(theta), sin(theta))
         return points
 
-    def _get_rating_points(self, position: complex) -> tuple[list[Position], list[Position]]:
+    def _get_rating_points(self, position: complex, ratings: list[float]) -> tuple[list[Position], list[Position]]:
         """Return the position on the screen that the ratings should appear on the graph"""
         theta = 2 * pi / 5
         points = []
@@ -203,9 +202,10 @@ class FivePointGraph:
 
         screen_points = []
         relative_points = []
+
         for i in range(5):
-            rating_x = points[i][0] * self.ratings[i] / 10
-            rating_y = points[i][1] * self.ratings[i] / 10
+            rating_x = points[i][0] * ratings[i] / 10
+            rating_y = points[i][1] * ratings[i] / 10
             screen_x_pos = rating_x + self._size / 2 + self.position[0]
             screen_y_pos = rating_y + self._size / 2 + self.position[1]
             relative_points.append((rating_x + self._size / 2, rating_y + self._size / 2))
@@ -268,15 +268,19 @@ class AnimeSpotlight:
     def redraw(self):
         self.draw()
         self.format_and_display_title()
-        self.graph.update(self.ratings)
+        rating_order = ['overall', 'animation', 'sound', 'character', 'enjoyment', 'story']
+        ratings = [self.ratings[rating_order[i]] for i in range(6)]
+        self.graph.update(ratings)
 
     def update(self, anime: Anime):
-        self.anime = anime.title
+        self.anime = anime._title
         # self.ratings = list(anime.ratings.values()) Use this if ratings attribute is a dict
-        self.ratings = anime.ratings
+        self.ratings = anime.calculate_average_ratings()
         self.draw()
         self.format_and_display_title()
-        self.graph.update(self.ratings)
+        rating_order = ['overall', 'animation', 'sound', 'character', 'enjoyment', 'story']
+        ratings = [self.ratings[rating_order[i]] for i in range(6)]
+        self.graph.update(ratings)
 
     def format_and_display_title(self):
         self.title_font = pygame.font.SysFont(self.font_style, self.font_size, bold=False)
@@ -413,7 +417,7 @@ class RecommendationDisplay:
         self.screen.blit(title_surf, self.position)
         self.generate_button.draw()
 
-    def update(self, animes: list[tuple[int, Anime]], spotlight: AnimeSpotlight) -> dict[str: tuple[Anime, Button]]:
+    def update(self, animes: list[Anime], spotlight: AnimeSpotlight) -> dict[str: tuple[Anime, Button]]:
         # TODO: Fix according to what Haishi does
         """Updates recommendations according to list of anime provided and returns the buttons created in a dict mapping
         the anime title to its button on the display. This makes checking for button clicks possible
@@ -424,7 +428,7 @@ class RecommendationDisplay:
 
         anime_buttons = {}
         for index, anime in enumerate(animes):
-            title = self.shorten_title(anime[1].title)
+            title = self.shorten_title(anime._title)
             title = f"{index + 1}. {title}"
             anime_button = Button(screen=self.screen,
                                   height=button_height,
@@ -438,8 +442,9 @@ class RecommendationDisplay:
                                   font_style=self.font_style,
                                   is_centered_text=False)
             anime_button.draw()
-            anime_buttons[anime[1].title] = (anime[1], anime_button)
-        spotlight.update(animes[0][1])
+            anime_buttons[anime._title] = (anime, anime_button)
+        # print(animes)
+        spotlight.update(animes[0])
         return anime_buttons
 
     def shorten_title(self, text) -> str:
@@ -547,129 +552,13 @@ class PreferenceMeterDisplay:
             offset_x = text.get_width() / 2
             self.screen.blit(text, (position_x + self.width / 2 - offset_x, self.text_height + 8))
 
-
-class RadialButton(Button):
-    filled_colour: Colour
-    is_toggled: bool
-
-    def __init__(self, screen: pygame.surface, radius: Coord, position: Position, colour: Colour,
-                 filled_colour: Colour, border_colour: Colour) -> None:
-        Button.__init__(self, screen, radius, radius, position, '', colour, colour, colour, border_colour=border_colour,
-                        border_radius=radius // 2)
-        self.filled_colour = filled_colour
-        self.is_toggled = False
-
-    def update(self):
-        btn_rect = pygame.Rect(self.position, (self._width, self._width))
-        small_btn_rect = pygame.Rect((self.position[0] + (self._width - self._width * 0.75) / 2,
-                                      self.position[1] + (self._width - self._width * 0.75) / 2),
-                                     (self._width * 0.75, self._width * 0.75))
-        pygame.draw.rect(self._screen, self._current_colour, btn_rect, border_radius=self._border_radius)
-        if self.is_toggled:
-            pygame.draw.rect(self._screen, self.filled_colour, small_btn_rect, border_radius=self._border_radius)
-        pygame.draw.rect(self._screen, self._border_colour, btn_rect, 3, border_radius=self._border_radius)
-
-
-class RadialButtonCollection:
-    clicked_buttons: set[str]
-    button_collection: dict[str: RadialButton]
-
-    def __init__(self) -> None:
-        self.clicked_buttons = set()
-        self.button_collection = {}
-
-    def add_button(self, name: str, button: RadialButton) -> None:
-        self.button_collection[name] = button
-
-    def update(self, clicked_button: str) -> bool:
-        self.button_collection[clicked_button].is_toggled = not self.button_collection[clicked_button].is_toggled
-        self.draw(clicked_button)
-        return self.button_collection[clicked_button].is_toggled
-
-    def draw(self, clicked_button: str):
-        if self.button_collection[clicked_button].is_toggled:
-            self.clicked_buttons.add(clicked_button)
-        else:
-            self.clicked_buttons.remove(clicked_button)
-        for ep_range in self.button_collection:
-            # potentially implement the single toggle
-            self.button_collection[ep_range].update()
-
-
-class EpisodeRangeFilterDisplay:
-    screen: pygame
-    height: Coord
-    width: Coord
-    position: Position
-    range_font: pygame.font.Font
-    range_colour: Colour
-    section_title_font: pygame.font.Font
-    section_title_colour: Colour
-    episode_ranges: list[str]
-    selected_episode_ranges: list[str]
-    radial_button_collection: RadialButtonCollection
-
-    def __init__(self, screen: pygame.surface, pos_x_percentage: float, height_percentage: float,
-                 range_colour: Colour, section_title_colour: Colour, button_radius: Coord,
-                 button_colour: Colour, button_filled_colour: Colour, button_border_colour: Colour,
-                 font_style: str) -> None:
-        self.screen = screen
-        self.height = screen.get_height() * height_percentage * 0.6
-        self.width = screen.get_width() * 0.3
-        self.position = (screen.get_width() * pos_x_percentage, 0)
-        self.range_font = pygame.font.SysFont(font_style, 20, bold=False)
-        self.section_title_font = pygame.font.SysFont(font_style, int(screen.get_height() * 0.035), bold=False)
-        self.range_colour = range_colour
-        self.section_title_colour = section_title_colour
-        self.episode_ranges = ['1 - 10', '11 - 16', '17 - 26', '27 - 48', '49 - 72', '73 +']
-        self.radial_button_collection = RadialButtonCollection()
-        self.selected_episode_ranges = []
-
-        base_x = self.position[0] + 5
-        base_y = self.position[1] + 30
-        offset_x = self.width * 0.3
-        offset_y = self.height * 0.6
-        for i, episode_range in enumerate(self.episode_ranges):
-            position = (
-                base_x + offset_x * (i % 3),
-                base_y + offset_y * (i // 3)
-            )
-            radial_button = RadialButton(screen,
-                                         button_radius,
-                                         position,
-                                         button_colour,
-                                         button_filled_colour,
-                                         button_border_colour)
-            self.radial_button_collection.add_button(episode_range, radial_button)
-
-    def draw(self) -> None:
-        # Draw section title
-        title = self.section_title_font.render('EPISODE COUNT', True, self.section_title_colour)
-        margin_y = self.height * 0.15
-        self.screen.blit(title, (self.position[0] + 5, margin_y))
-
-        # Draw Buttons
-        for ep_range in self.radial_button_collection.button_collection:
-            button = self.radial_button_collection.button_collection[ep_range]
-            text = self.range_font.render(ep_range, True, self.range_colour)
-            range_pos = (
-                button.position[0] + 20,
-                button.position[1] - text.get_height() / 4 + 5
-            )
-            self.screen.blit(text, range_pos)
-            button.draw()
-
-    def update(self, ep_range: str) -> None:
-        if self.radial_button_collection.update(ep_range):
-            self.selected_episode_ranges.append(ep_range)
-        else:
-            self.selected_episode_ranges.remove(ep_range)
-
-    def get_episode_ranges(self) -> list[str]:
-        if not self.selected_episode_ranges:
-            return self.episode_ranges
-        else:
-            return self.selected_episode_ranges
+    def get_preferences(self) -> dict[str: int]:
+        prio = {'story': self.meters['STORY'].value,
+                'animation' : self.meters['ANIMATION'].value,
+                'sound': self.meters['SOUND'].value,
+                'character': self.meters['CHARACTER'].value,
+                'num-episodes': 27}
+        return prio
 
 
 class DropDownMenuButton(Button):
@@ -736,94 +625,6 @@ class DropDownMenu:
             return True
         else:
             return False
-
-
-class GenreFilterDisplay:
-    screen: pygame
-    height: Coord
-    width: Coord
-    position: Position
-    genre_font: pygame.font.Font
-    genre_colour: Colour
-    section_title_font: pygame.font.Font
-    section_title_colour: Colour
-    genres: list[str]
-    menu_open_button: Button
-    drop_down_menu: DropDownMenu
-    menu_open_button_colour: Colour
-    menu_open_button_hover_colour: Colour
-    menu_open_button_text_colour: Colour
-    menu_base_pos: Position
-    menu_size: tuple[Coord, Coord]
-    selected_genres: list[str]
-
-    def __init__(self, screen: pygame.surface, pos_x_percentage: float, height_percentage: float,
-                 genre_colour: Colour, section_title_colour: Colour,
-                 button_colour: Colour, button_filled_colour: Colour, button_border_colour: Colour,
-                 menu_open_button_colour: Colour, menu_open_button_hover_colour: Colour,
-                 menu_open_button_text_colour: Colour, genre_button_hover_colour: Colour, font_style: str) -> None:
-        self.screen = screen
-        self.height = screen.get_height() * height_percentage * 0.6
-        self.width = screen.get_width() * 0.3
-        self.position = (screen.get_width() * pos_x_percentage, 0)
-        self.genre_font = pygame.font.SysFont(font_style, int(screen.get_height() * 0.025), bold=False)
-        self.section_title_font = pygame.font.SysFont(font_style, int(screen.get_height() * 0.035), bold=False)
-        self.genre_colour = genre_colour
-        self.section_title_colour = section_title_colour
-        self.genres = ['Police', 'Comedy', 'Supernatural', 'Music', 'Sports', 'Shounen Ai', 'Shoujo', 'Vampire',
-                       'Yuri', 'Sci-Fi', 'Military', 'Cars', 'Action', 'Thriller', 'Demons', 'School', 'Romance',
-                       'Kids', 'Super Power', 'Magic', 'Space', 'Slice of Life', 'Shoujo Ai', 'Samurai', 'Horror',
-                       'Historical', 'Psychological', 'Martial Arts', 'Mecha', 'Seinen', 'Parody', 'Josei',
-                       'Drama', 'Yaoi', 'Shounen', 'Fantasy', 'Game', 'Dementia', 'Adventure', 'Mystery']
-        self.drop_down_menu = DropDownMenu(font_style)
-
-        genre_button_width = self.width * 0.45
-        base_x = self.position[0] + self.width * 0.8 - 4 * genre_button_width
-        base_y = self.position[1] + self.height * 1.5 + 4
-        offset_x = genre_button_width
-        offset_y = self.height * 0.6
-        for i, genre in enumerate(self.genres):
-            position = (
-                base_x + offset_x * (i % 4),
-                base_y + offset_y * (i // 4)
-            )
-            drop_down_menu_button = DropDownMenuButton(screen,
-                                                       self.height * 0.6,
-                                                       genre_button_width,
-                                                       position,
-                                                       genre,
-                                                       button_colour,
-                                                       button_filled_colour,
-                                                       button_border_colour,
-                                                       genre_button_hover_colour,
-                                                       font_style)
-            self.drop_down_menu.add_button(genre, drop_down_menu_button)
-
-        self.menu_open_button = Button(screen,
-                                       self.height * 0.6,
-                                       self.width * 0.8,
-                                       (self.position[0], self.position[1] + self.height * 0.9),
-                                       'Genre Filter',
-                                       menu_open_button_colour,
-                                       hover_colour=menu_open_button_hover_colour,
-                                       text_colour=menu_open_button_text_colour,
-                                       font_style=font_style)
-        self.menu_base_pos = (base_x, base_y)
-        self.menu_size = (4 * genre_button_width, 6 * self.height)
-        self.selected_genres = []
-
-    def draw(self) -> None:
-        self.menu_open_button.draw()
-
-    def add_genre(self, genre: str) -> None:
-        self.selected_genres.append(genre)
-        self.drop_down_menu.button_collection[genre].update()
-
-    def get_selected_genres(self) -> list[str]:
-        if not self.selected_genres:
-            return self.genres
-        else:
-            return self.selected_genres
 
 
 class TextInputBox(Button):

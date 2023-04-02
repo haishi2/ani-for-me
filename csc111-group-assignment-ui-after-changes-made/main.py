@@ -1,8 +1,8 @@
 import pygame, sys
-from ui.ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, EpisodeRangeFilterDisplay, \
-    GenreFilterDisplay, Button, AirDateFilterDisplay, Text, InputBox2, DropDown2
+from ui.ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, Button, AirDateFilterDisplay, Text, InputBox2, DropDown2
 from classes.anime_and_users import Anime, User
 from classes.graph import ReccomenderGraph, read_file, save_profile, import_profile, import_profile_to_user, Review
+import datetime
 
 Coord = int | float
 Colour = tuple[int, int, int]
@@ -211,67 +211,6 @@ def draw_preference_display(screen: pygame.Surface) -> PreferenceMeterDisplay:
     return preference_meter_display
 
 
-def draw_episode_range_filter(screen: pygame.Surface) -> EpisodeRangeFilterDisplay:
-    episode_range_filter_display = EpisodeRangeFilterDisplay(screen,
-                                                             EPISODE_RANGE_DISPLAY_PERCENTAGE_X,
-                                                             TOP_BAR_HEIGHT_PERCENTAGE,
-                                                             RANGE_COLOUR,
-                                                             EPISODE_COUNT_TITLE_COLOUR,
-                                                             BUTTON_RADIUS,
-                                                             RADIAL_BUTTON_COLOUR,
-                                                             RADIAL_BUTTON_FILLED_COLOUR,
-                                                             RADIAL_BUTTON_BORDER_COLOUR,
-                                                             FONT_STYLE)
-    episode_range_filter_display.draw()
-    return episode_range_filter_display
-
-
-def draw_genre_filter_display(screen: pygame.Surface) -> GenreFilterDisplay:
-    genre_filter_display = GenreFilterDisplay(screen,
-                                              GENRE_FILTER_DISPLAY_OFFSET_X_PERCENTAGE,
-                                              TOP_BAR_HEIGHT_PERCENTAGE,
-                                              GENRE_TEXT_COLOUR,
-                                              SECTION_TITLE_COLOUR,
-                                              GENRE_BUTTON_COLOUR,
-                                              GENRE_BUTTON_FILLED_COLOUR,
-                                              GENRE_BUTTON_BORDER_COLOUR,
-                                              MENU_OPEN_BUTTON_COLOUR,
-                                              MENU_OPEN_BUTTON_HOVER_COLOUR,
-                                              MENU_OPEN_BUTTON_TEXT_COLOUR,
-                                              GENRE_BUTTON_HOVER_COLOUR,
-                                              FONT_STYLE)
-    genre_filter_display.draw()
-    return genre_filter_display
-
-
-def hide_drop_down(screen: pygame.Surface, episode_range_filter_display: EpisodeRangeFilterDisplay,
-                   recommendation_display: RecommendationDisplay, preference_display: PreferenceMeterDisplay,
-                   genre_filter_display: GenreFilterDisplay, year_filter: AirDateFilterDisplay, back_button: Button,
-                   anime_spotlight: AnimeSpotlight) -> None:
-    # Top section
-    draw_top_bar(screen, TOP_BAR_BACKGROUND_COLOUR, TOP_BAR_HEIGHT_PERCENTAGE)
-    back_button.draw()
-    clicked_buttons = episode_range_filter_display.radial_button_collection.clicked_buttons
-    episode_range_filter_display.draw()
-    preference_display.draw_meter_titles()
-    for meter in preference_display.meters.values():
-        meter.draw()
-    genre_filter_display.draw()
-    year_filter.draw()
-    year_filter.input_box_start.update_text()
-    year_filter.input_box_end.update_text()
-
-    # Recommendation section
-    for clicked_button in clicked_buttons:
-        episode_range_filter_display.radial_button_collection.draw(clicked_button)
-    recommendation_display_bg_rect = pygame.Rect(recommendation_display.position[0], recommendation_display.position[1],
-                                                 recommendation_display.width, recommendation_display.height)
-    pygame.draw.rect(screen, BACKGROUND_COLOUR, recommendation_display_bg_rect)
-    recommendation_display.draw()
-
-    anime_spotlight.redraw()
-
-
 def draw_year_filter(screen: pygame.Surface) -> AirDateFilterDisplay:
     air_date_filter_display = AirDateFilterDisplay(screen,
                                                    TOP_BAR_HEIGHT_PERCENTAGE,
@@ -291,7 +230,11 @@ def create_profile(username: str, fav_animes: set[Anime]):
     global user
     user = User(
         username=username,
-        fav_animes=fav_animes
+        fav_animes=fav_animes,
+        favorite_era=(datetime.date(1961, 1, 1), datetime.date(2021, 1, 1)),
+        review=None,
+        friend_list=[],
+        priority= {'story': 1, 'animation': 1, 'sound': 1, 'character': 1}
     )
     filename = f"users/{username}.csv"
     save_profile(user, filename)
@@ -313,19 +256,23 @@ def run_reccomendations(screen: pygame.Surface) -> None:
     recommendation_display = draw_recommendation_display(screen)
     preference_display = draw_preference_display(screen)
     generate_button = recommendation_display.generate_button
-    episode_range_filter = draw_episode_range_filter(screen)
-    genre_filter_display = draw_genre_filter_display(screen)
+    # episode_range_filter = draw_episode_range_filter(screen)
     year_filter = draw_year_filter(screen)
 
+
+    # Import user into graph
+    import_profile(f"users/{user.username}.csv", rec_graph)
+    
+    rec = rec_graph.get_all_path_scores(user)
+    rec_anime = [anime[0] for anime in rec]
     # TODO PUT GENERATION HERE 
-    # recommendations = recommendation_display.update(anime_ranked, anime_spotlight)
+    recommendations = recommendation_display.update(rec_anime, anime_spotlight)
 
     while True:
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
         is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
-        drop_down_menu = genre_filter_display.drop_down_menu
         is_key_down = any(event.type == pygame.KEYDOWN for event in events)
         pressed_key = None
         is_backspace_pressed = False
@@ -336,94 +283,59 @@ def run_reccomendations(screen: pygame.Surface) -> None:
                 if event.key == pygame.K_BACKSPACE:
                     is_backspace_pressed = True
         # GENERATE BUTTON
-        if not drop_down_menu.is_deployed:
-            generate_button.update_colour(mouse_pos)
-        if generate_button.is_clicked(is_clicking, mouse_pos) and not drop_down_menu.is_deployed:
+
+        generate_button.update_colour(mouse_pos)
+        if generate_button.is_clicked(is_clicking, mouse_pos):
             if year_filter.input_box_start.is_active:
                 year_filter.input_box_start.update_activity()
             if year_filter.input_box_end.is_active:
                 year_filter.input_box_end.update_activity()
             # Testing fileter exports
-            print(f"genres: {genre_filter_display.get_selected_genres()}")
-            print(f"episode: {episode_range_filter.get_episode_ranges()}")
-            print(f"preferences: {[(name, value.value) for name, value in preference_display.meters.items()]}")
-            print(f"year range: {year_filter.get_year_range()}")
-            # TODO PUT GENERATION HERE
-            # recommendations = recommendation_display.update(anime_ranked, anime_spotlight)
+            # TODO UPDATE PROFILE
+            new_rec_graph = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+            d1 = datetime.date(year_filter.get_year_range()[0], 1, 1)
+            d2 = datetime.date(year_filter.get_year_range()[1], 1, 1)
+            date_range = (d1, d2)
+            user.favorite_era = date_range
+            prio = preference_display.get_preferences()
+            user.priorities = prio
+            save_profile(user, f"users/{user.username}.csv")
+            import_profile(f"users/{user.username}.csv", new_rec_graph)
+            rec = new_rec_graph.get_all_path_scores(user)
+            rec_anime = [anime[0] for anime in rec]
+            recommendations = recommendation_display.update(rec_anime, anime_spotlight)
 
         # Account button
-        if not drop_down_menu.is_deployed:
-            if account_button.update_colour(mouse_pos):
-                fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
-            else:
-                fill_img(account_button.image, BACK_ARROW_COLOUR)
-        if account_button.is_clicked(is_clicking, mouse_pos) and not drop_down_menu.is_deployed:
+        if account_button.update_colour(mouse_pos):
+            fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
+        else:
+            fill_img(account_button.image, BACK_ARROW_COLOUR)
+        if account_button.is_clicked(is_clicking, mouse_pos):
             game_state = 'home'
 
         for recommendation in recommendations:
             # Update spotlight on button press
-            if recommendations[recommendation][1].is_clicked(is_clicking, mouse_pos) and not drop_down_menu.is_deployed:
+            if recommendations[recommendation][1].is_clicked(is_clicking, mouse_pos):
                 if year_filter.input_box_start.is_active:
                     year_filter.input_box_start.update_activity()
                 if year_filter.input_box_end.is_active:
                     year_filter.input_box_end.update_activity()
                 anime_spotlight.update(recommendations[recommendation][0])
             # Update button colour on hover
-            if not drop_down_menu.is_deployed:
-                recommendations[recommendation][1].update_colour(mouse_pos)
+            recommendations[recommendation][1].update_colour(mouse_pos)
 
         # Update Preference Meters
         for meter in preference_display.meters:
             curr_meter = preference_display.meters[meter]
-            if curr_meter.is_clicked(is_clicking, mouse_pos) and not drop_down_menu.is_deployed:
+            if curr_meter.is_clicked(is_clicking, mouse_pos):
                 if year_filter.input_box_start.is_active:
                     year_filter.input_box_start.update_activity()
                 if year_filter.input_box_end.is_active:
                     year_filter.input_box_end.update_activity()
                 curr_meter.update(mouse_pos)
 
-        # Update Episode Range Display
-        ep_button_collection = episode_range_filter.radial_button_collection.button_collection
-        for ep_range in ep_button_collection:
-            button = ep_button_collection[ep_range]
-            if button.is_clicked(is_clicking, mouse_pos) and not drop_down_menu.is_deployed:
-                if year_filter.input_box_start.is_active:
-                    year_filter.input_box_start.update_activity()
-                if year_filter.input_box_end.is_active:
-                    year_filter.input_box_end.update_activity()
-                for btn in ep_button_collection.values():
-                    if btn is not button:
-                        btn.is_toggled = False
-                episode_range_filter.update(ep_range)
-                
-
-        # Genre button hover
-        genre_filter_display.menu_open_button.update_colour(mouse_pos)
-
-        # Update Drop Down Menu
-        if genre_filter_display.menu_open_button.is_clicked(is_clicking, mouse_pos) or drop_down_menu.clicked_off(
-                is_clicking, mouse_pos):
-            if year_filter.input_box_start.is_active:
-                year_filter.input_box_start.update_activity()
-            if year_filter.input_box_end.is_active:
-                year_filter.input_box_end.update_activity()
-            drop_down_menu.update()
-            if drop_down_menu.is_deployed:
-                drop_down_menu.draw_menu(screen, genre_filter_display.menu_base_pos, genre_filter_display.menu_size,
-                                         GENRE_BUTTON_COLOUR)
-            else:
-                hide_drop_down(screen, episode_range_filter, recommendation_display, preference_display,
-                               genre_filter_display, year_filter, account_button, anime_spotlight)
-
-        if drop_down_menu.is_deployed:
-            for genre, button in drop_down_menu.button_collection.items():
-                button.update_colour(mouse_pos)
-                # Update Genres
-                if button.is_clicked(is_clicking, mouse_pos):
-                    genre_filter_display.add_genre(genre)
-
         # Year Filter
-        if year_filter.input_box_start.is_clicked(is_clicking, mouse_pos) and not drop_down_menu.is_deployed:
+        if year_filter.input_box_start.is_clicked(is_clicking, mouse_pos):
             year_filter.input_box_start.update_activity()
             if year_filter.input_box_end.is_active:
                 year_filter.input_box_end.update_activity()
@@ -436,7 +348,7 @@ def run_reccomendations(screen: pygame.Surface) -> None:
                 year_filter.input_box_start.input_text += pressed_key
                 year_filter.input_box_start.update_text()
 
-        if year_filter.input_box_end.is_clicked(is_clicking, mouse_pos) and not drop_down_menu.is_deployed:
+        if year_filter.input_box_end.is_clicked(is_clicking, mouse_pos):
             year_filter.input_box_end.update_activity()
             if year_filter.input_box_start.is_active:
                 year_filter.input_box_start.update_activity()

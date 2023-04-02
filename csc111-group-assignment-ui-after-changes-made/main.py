@@ -1,5 +1,6 @@
 import pygame, sys
-from ui.ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, Button, AirDateFilterDisplay, Text, InputBox2, DropDown2
+from ui.ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, Button, AirDateFilterDisplay, \
+    Text, InputBox2, DropDown2
 from classes.anime_and_users import Anime, User
 from classes.graph import ReccomenderGraph, read_file, save_profile, import_profile, import_profile_to_user, Review
 from classes.graph import search
@@ -12,7 +13,10 @@ Colour = tuple[int, int, int]
 
 game_state = 'main'
 
-rec_graph = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+rec_graph = read_file(
+    ['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv',
+     'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
+     'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
 
 # Screen Constants
 # 46, 81, 162
@@ -104,6 +108,7 @@ ACCOUNT_BUTTON_TEXT_COLOUR = (0, 0, 0)
 ACCOUNT_BUTTON_BORDER_COLOUR = (255, 255, 255)
 SINGLE_BUTTON_BORDER_RADIUS = 10
 
+
 # TODO
 def get_user(username: str) -> None:
     """Sets global user to user login"""
@@ -124,6 +129,8 @@ def add_anime(anime_name: int, ratings: list[int]) -> None:
     user.reviews[anime] = review
 
     save_user_profile(user)
+
+
 #  reviews: dict[Anime, g.Review]
 
 
@@ -235,7 +242,7 @@ def create_profile(username: str, fav_animes: set[Anime]):
         favorite_era=(datetime.date(1961, 1, 1), datetime.date(2021, 1, 1)),
         review=None,
         friend_list=[],
-        priority= {'story': 1, 'animation': 1, 'sound': 1, 'character': 1}
+        priority={'story': 1, 'animation': 1, 'sound': 1, 'character': 1}
     )
     filename = f"users/{username}.csv"
     save_profile(user, filename)
@@ -259,7 +266,6 @@ def run_reccomendations(screen: pygame.Surface) -> None:
     generate_button = recommendation_display.generate_button
     # episode_range_filter = draw_episode_range_filter(screen)
     year_filter = draw_year_filter(screen)
-
 
     # Import user into graph
     import_profile(f"users/{user.username}.csv", rec_graph)
@@ -293,7 +299,10 @@ def run_reccomendations(screen: pygame.Surface) -> None:
                 year_filter.input_box_end.update_activity()
             # Testing fileter exports
             # TODO UPDATE PROFILE
-            new_rec_graph = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+            new_rec_graph = read_file([
+                                          'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv',
+                                          'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
+                                          'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
             d1 = datetime.date(year_filter.get_year_range()[0], 1, 1)
             d2 = datetime.date(year_filter.get_year_range()[1], 1, 1)
             date_range = (d1, d2)
@@ -383,7 +392,8 @@ def run_login(screen: pygame.Surface) -> None:
     Text(screen, 30, "Username:", 60, 340).draw()
     username_btn = InputBox2(175, 335, 400, 32)
     login_btn = Button(screen, 35, 200, (60, 415), "Log-in", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
-    create_btn = Button(screen, 35, 200, (280, 415), "Create Account", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    create_btn = Button(screen, 35, 200, (280, 415), "Create Account", (51, 51, 51), SECTION_TITLE_COLOUR,
+                        (255, 255, 255))
 
     login_btn.draw()
     create_btn.draw()
@@ -410,7 +420,7 @@ def run_login(screen: pygame.Surface) -> None:
                 username_btn.text = ''
                 enter_home_menu = False
 
-            if(enter_home_menu):
+            if (enter_home_menu):
                 game_state = 'home'
 
         if create_btn.is_clicked(is_clicking, mouse_pos):
@@ -426,14 +436,16 @@ def run_login(screen: pygame.Surface) -> None:
 
 
 def run_home(screen: pygame.Surface):
-
     global game_state
     screen.fill((255, 255, 255))
     Text(screen, 48, "Ani-4-me", 310, 240).draw()
     rate_btn = Button(screen, 35, 200, (180, 300), "Rate Anime", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
-    add_friends = Button(screen, 35, 200, (390, 300), "Add Friends", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
-    get_reccomendations = Button(screen, 35, 200, (180, 350), "Get Reccomendations", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
-    search_for_anime_ids = Button(screen, 35, 200, (390, 350), "Get anime identifiers", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    add_friends = Button(screen, 35, 200, (390, 300), "Add Friends", (51, 51, 51), SECTION_TITLE_COLOUR,
+                         (255, 255, 255))
+    get_reccomendations = Button(screen, 35, 200, (180, 350), "Get Reccomendations", (51, 51, 51), SECTION_TITLE_COLOUR,
+                                 (255, 255, 255))
+    search_for_anime_ids = Button(screen, 35, 200, (390, 350), "Get anime identifiers", (51, 51, 51),
+                                  SECTION_TITLE_COLOUR, (255, 255, 255))
 
     rate_btn.draw()
     add_friends.draw()
@@ -478,7 +490,8 @@ def run_add_friends(screen: pygame.Surface):
     Text(screen, 36, "Add Friend", 60, 230).draw()
     Text(screen, 30, "Username:", 60, 300).draw()
     username_btn = InputBox2(175, 295, 400, 32)
-    add_friend_btn = Button(screen, 35, 200, (60, 370), "Add Friend", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    add_friend_btn = Button(screen, 35, 200, (60, 370), "Add Friend", (51, 51, 51), SECTION_TITLE_COLOUR,
+                            (255, 255, 255))
     add_friend_btn.draw()
     account_button = draw_account_button(screen)
 
@@ -538,7 +551,7 @@ def run_sign_in(screen: pygame.Surface):
     fav_anime_btn = InputBox2(175, 305, 400, 32)
 
     create_account_btn = Button(screen, 35, 200, (60, 370), "Create Account", (51, 51, 51), SECTION_TITLE_COLOUR,
-                            (255, 255, 255))
+                                (255, 255, 255))
     fav_animes = set()
     while True:
         # UI Elements
@@ -580,16 +593,16 @@ def run_sign_in(screen: pygame.Surface):
         if game_state != 'sign-in':
             break
 
+
 def run_search_screen(screen: pygame.surface):
     global game_state
     screen.fill((255, 255, 255))
-    Text(screen, 20, "Anime Name:", 90, 30).draw()
     account_button = draw_account_button(screen)
     anime_name_btn = InputBox2(200, 20, 400, 32)
     search_button = Button(screen, 32, 70, (630, 20), "search", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
 
     while True:
-        pygame.draw.rect(screen, (255, 255, 255), (175, 295, 400, 32))
+        Text(screen, 20, "Anime Name:", 90, 30).draw()
         search_button.draw()
         pygame.display.flip()
         events = pygame.event.get()
@@ -599,20 +612,25 @@ def run_search_screen(screen: pygame.surface):
         for event in events:
             anime_name_btn.handle_event(event)
 
+        pygame.draw.rect(screen, (255, 255, 255), (200, 20, 400, 32))
         anime_name_btn.draw(screen)
+        search_button.update_colour(mouse_pos)
 
         if search_button.is_clicked(is_clicking, mouse_pos):
+            pygame.draw.rect(screen, (255, 255, 255), (20, 100, 700, 600))
             res = [anime for anime in search(anime_name_btn.text, rec_graph)]
+            print(res)
             if len(res) >= 10:
                 for i in range(10):
-                    font = pygame.font.SysFont(FONT_STYLE, 30)
-                    text = font.render(f'{res[i]}', True, (0,0,0))
-                    screen.blit(text, (150, 100 + 50 * i))
+                    font = pygame.font.SysFont(FONT_STYLE, 25)
+                    text = font.render(f'{res[i]}', False, (0, 0, 0))
+                    screen.blit(text, (20, 100 + 50 * i))
             else:
                 for i in range(len(res)):
-                    font = pygame.font.SysFont(FONT_STYLE, 30)
-                    text = font.render(f'{res[i]}', True, (0,0,0))
-                    screen.blit(text, (150, 100 + 50 * i))
+                    font = pygame.font.SysFont(FONT_STYLE, 25)
+                    text = font.render(f'{res[i]}', False, (0, 0, 0))
+                    screen.blit(text, (20, 100 + 50 * i))
+            anime_name_btn.text = ''
 
         if account_button.update_colour(mouse_pos):
             fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
@@ -623,6 +641,7 @@ def run_search_screen(screen: pygame.surface):
 
         if game_state != 'search':
             break
+
 
 def run_rate_anime(screen: pygame.Surface):
     global game_state
@@ -637,7 +656,8 @@ def run_rate_anime(screen: pygame.Surface):
     overall_btn = InputBox2(200, 320, 400, 32)
     account_button = draw_account_button(screen)
 
-    rate_anime_btn = Button(screen, 35, 400, (200, 400), "Rate Anime", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    rate_anime_btn = Button(screen, 35, 400, (200, 400), "Rate Anime", (51, 51, 51), SECTION_TITLE_COLOUR,
+                            (255, 255, 255))
     ratings = [0, 0, 0, 0, 0, 0]
 
     while True:
@@ -719,7 +739,6 @@ def initialize_screen(screen_size: tuple[int, int], background_colour: tuple[int
     return screen
 
 
-
 def run_project() -> None:
     screen = initialize_screen(SCREEN_SIZE, BACKGROUND_COLOUR)
     while True:
@@ -737,7 +756,6 @@ def run_project() -> None:
             run_reccomendations(screen)
         elif game_state == 'search':
             run_search_screen(screen)
-
 
 
 if __name__ == "__main__":

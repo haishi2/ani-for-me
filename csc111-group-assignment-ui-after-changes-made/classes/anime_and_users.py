@@ -130,7 +130,7 @@ class User:
         """intialize a new user and calculate their priority weights
         Preconditions:
             - (favorite era[1] - favorite_era[0]).days > 0
-            - all(priority[p] >= 0 for p in proirity)
+            - all(priority[p] >= 0 for p in priority)
             - all(all(rating >= 0 for rating in review[anime]) for anime in review
             - len({anime for anime in review}) == len(review)
             - len(set(friend_list)) == len(friend_list)

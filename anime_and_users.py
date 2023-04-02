@@ -105,9 +105,9 @@ class Anime:
             visited_reviews = []
             visited_path = []
             if visited_nodes[-1] not in added_ends and visited_nodes[-2] not in added_ends:
-                if visited_nodes[-1] not in added_ends:
+                if visited_nodes[-1].__class__.__name__ == 'Anime':
                     added_ends.append(visited_nodes[-1])
-                else:
+                elif visited_nodes[-2].__class__.__name__ == 'Anime':
                     added_ends.append(visited_nodes[-2])
                 for i in range(0, len(visited_nodes) - 1, 2):
                     visited_reviews.append(visited_nodes[i].reviews[visited_nodes[i + 1]])
@@ -211,9 +211,9 @@ class User:
             visited_reviews = []
             visited_path = []
             if visited_nodes[-1] not in added_ends and visited_nodes[-2] not in added_ends:
-                if visited_nodes[-1] not in added_ends:
+                if visited_nodes[-1].__class__.__name__ == 'Anime':
                     added_ends.append(visited_nodes[-1])
-                else:
+                elif visited_nodes[-2].__class__.__name__ == 'Anime':
                     added_ends.append(visited_nodes[-2])
                 for i in range(0, len(visited_nodes) - 1, 2):
                     visited_reviews.append(visited_nodes[i].reviews[visited_nodes[i + 1]])

@@ -322,7 +322,7 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-        return sorted(scores.items(), key=lambda x:x[1], reverse=True)
+        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
 
 if __name__ == '__main__':
@@ -333,7 +333,7 @@ if __name__ == '__main__':
         'extra-imports': ['graph', 'typing', 'datetime', 're'],
         'allowed-io': ['import_profile', 'save_profile'],
         'disable': ['too-many-nested-blocks', 'too-many-instance-attributes', 'too-many-arguments'],
-        'max-line-length': 120
+        'max-line-length': 130
     })
     date1 = datetime.date(2000, 10, 1)
     date2 = datetime.date(2005, 10, 1)

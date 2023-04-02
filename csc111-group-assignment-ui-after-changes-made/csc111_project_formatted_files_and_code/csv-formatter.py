@@ -286,7 +286,7 @@ def write_profiles_no_duplicates() -> None:
     """Write to a new file of the profiles after having removed the duplicates.
     """
     profiles = remove_user_duplicate()
-    with open("data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
+    with open('data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv',
               'w',
               newline='',
               encoding="utf-8") as file:
@@ -347,7 +347,12 @@ if __name__ == '__main__':
 
     python_ta.check_all(config={
         'extra-imports': ['calendar', 'csv', 're', 'typing'],  # the names (strs) of imported modules
-        'disable': ['too-many-nested-blocks', 'too-many-locals', 'unnecessary-indexing'],
-        'allowed-io': [],     # the names (strs) of functions that call print/open/input
+        'disable': ['too-many-nested-blocks', 'too-many-locals', 'unnecessary-indexing',
+                    'forbidden-top-level-code', 'forbidden-global-variables'],
+        'allowed-io': ['read_uids', 'read_and_write_reviews', 'read_and_write_profiles',
+                       'read_and_write_animes', 'remove_anime_duplicates', 'write_anime_no_duplicates',
+                       'remove_review_duplicates', 'write_review_no_duplicates', 'remove_user_duplicate',
+                       'write_profiles_no_duplicates', 'fix_inconsistent_users', 'write_consistent_users'],
+        # the names (strs) of functions that call print/open/input
         'max-line-length': 120
-    })        
+    })

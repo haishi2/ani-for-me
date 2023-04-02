@@ -308,9 +308,9 @@ class User:
             deviations_distance = (anime.get_num_episodes() - mid) / stddev
             return 1 - (deviations_distance / max_std_deviations_r)
 
-    def reccomend_based_on_friends(self) -> dict[Anime: float]:
-        """Reccomend anime based on what the user's friends have watched. If the user has no friends, return an empty
-        dict.
+    def reccomend_based_on_friends(self) -> list:
+        """Reccomend anime based on what the user's friends have watched. If the user has no friends, returns an empty
+        list.
         """
         already_watched = self.favorite_animes.union(self.reviews.keys())
         animes_to_rank = set()
@@ -322,7 +322,7 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-        return scores
+        return sorted(scores.items(), key=lambda x:x[1], reverse=True)
 
 
 if __name__ == '__main__':

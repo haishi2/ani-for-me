@@ -619,7 +619,6 @@ def run_search_screen(screen: pygame.surface):
         if search_button.is_clicked(is_clicking, mouse_pos):
             pygame.draw.rect(screen, (255, 255, 255), (20, 100, 700, 600))
             res = [anime for anime in search(anime_name_btn.text, rec_graph)]
-            print(res)
             if len(res) >= 10:
                 for i in range(10):
                     font = pygame.font.SysFont(FONT_STYLE, 25)

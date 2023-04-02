@@ -87,13 +87,13 @@ class ReccomenderGraph:
             - depth >= 2
             - user in self.users
         """
-
-        paths = [pa for pa in user.get_all_path_scores_helper(0, [], []) if len(pa) > 2]
+        watched_animes = user.favorite_animes.union({ani for ani in user.reviews})
+        paths = [pa for pa in user.get_all_path_scores_helper(0, [], list(watched_animes)) if len(pa) > 2]
         scores = []
         for path in paths:
             scores.append((path[-1].endpoints[1], self.calculate_path_score(path, user)))
 
-        return sorted(scores, key=lambda x: x[1], reverse=True)
+        return sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
 
     def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path

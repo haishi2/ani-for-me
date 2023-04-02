@@ -243,7 +243,7 @@ def read_file(files: list[str]) -> ReccomenderGraph:
     return graph
 
 
-def import_profile(file: str, graph: ReccomenderGraph) -> None:
+def import_profile(file: str, graph: ReccomenderGraph) -> aau.User:
     """loads a user from a csv file and adds them into the graph
     Preconditions:
         - files are formatted correctly
@@ -287,8 +287,9 @@ def import_profile(file: str, graph: ReccomenderGraph) -> None:
 
             reviews[graph.animes[int(lines[0])]] = ratings_int
             line = reader.readline()
-
-        graph.insert_user(aau.User(username, favorite_animes, (date1, date2), reviews, priority, friends))
+        u = aau.User(username, favorite_animes, (date1, date2), reviews, priority, friends)
+        graph.insert_user(u)
+        return u
 
 
 def save_profile(user: aau.User, file_name: str) -> None:

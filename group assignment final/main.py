@@ -1,7 +1,7 @@
 """
 CSC111 Project: Main Runner
 
-This module contains the functions required to run the Reccomendation System
+This module contains the functions required to run the Reccomendation System.
 
 This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """

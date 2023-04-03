@@ -869,5 +869,5 @@ if __name__ == "__main__":
         'allowed-io': ['import_profile', 'save_profile'],
         'disable': ['too-many-nested-blocks', 'too-many-instance-attributes', 'too-many-arguments', 'E1101', 'E9997',
                     'E9970', 'E9971', 'C0115', 'C0116', 'E9972', 'E9992'],
-        'max-line-length': 130
+        'max-line-length': 120
     })

@@ -841,6 +841,6 @@ if __name__ == "__main__":
         'allowed-io': ['import_profile', 'save_profile'],
         'disable': ['E1101', 'E9992', 'E9997', 'too-many-locals', 'possibly-undefined', 'too-many-nested-blocks',
                     'too-many-branches', 'too-many-statements', 'C0103', 'C0116', 'E9970', 'E9971', 'E9928', 'W0621'],
-        'max-line-length': 130
+        'max-line-length': 120
     })
     run_project()

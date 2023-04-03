@@ -92,8 +92,8 @@ class Anime:
 
         return {section: round(ratings_dict[section] / len(self.reviews), 2) for section in ratings_dict}
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
-            list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User],
+                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
@@ -189,8 +189,8 @@ class User:
             self.calculate_genre_match_avg()
             self.calculate_priority_weights()
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
-            list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User],
+                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
@@ -325,7 +325,7 @@ if __name__ == '__main__':
         'extra-imports': ['graph', 'typing', 'datetime', 're'],
         'allowed-io': ['import_profile', 'save_profile'],
         'disable': ['too-many-nested-blocks', 'too-many-instance-attributes', 'too-many-arguments'],
-        'max-line-length': 130
+        'max-line-length': 120
     })
     # date1 = datetime.date(2000, 10, 1)
     # date2 = datetime.date(2005, 10, 1)

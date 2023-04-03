@@ -24,7 +24,6 @@ Colour = tuple[int, int, int]
 
 game_state = 'main'
 
-#TODO change these paths
 rec_graph = read_file(
     ['anime_formatted_no_duplicates.csv',
      'profiles_formatted_no_duplicates.csv',
@@ -121,7 +120,7 @@ ACCOUNT_BUTTON_BORDER_COLOUR = (255, 255, 255)
 SINGLE_BUTTON_BORDER_RADIUS = 10
 
 
-# TODO
+
 def get_user(username: str) -> None:
     """Sets global user to user login"""
     global user
@@ -308,8 +307,6 @@ def run_reccomendations(screen: pygame.Surface) -> None:
                 year_filter.input_box_start.update_activity()
             if year_filter.input_box_end.is_active:
                 year_filter.input_box_end.update_activity()
-            # Testing fileter exports
-            # TODO UPDATE PROFILE
             new_rec_graph = read_file([
                 'anime_formatted_no_duplicates.csv',
                 'profiles_formatted_no_duplicates.csv',
@@ -443,6 +440,7 @@ def run_recommendations_based_on_friends(screen: pygame.Surface) -> None:
         if game_state != 'get_rec_friends':
             break
 
+
 def run_login(screen: pygame.Surface) -> None:
     """ Log-in Page """
     global game_state
@@ -509,7 +507,7 @@ def run_home(screen: pygame.Surface):
     search_for_anime_ids = Button(screen, 35, 200, (390, 350), "Get anime identifiers", (51, 51, 51),
                                   SECTION_TITLE_COLOUR, (255, 255, 255))
     reccomend_friends = Button(screen, 35, 410, (180, 400), "Reccomend based on friends", (51, 51, 51),
-                                  SECTION_TITLE_COLOUR, (255, 255, 255))
+                               SECTION_TITLE_COLOUR, (255, 255, 255))
 
     rate_btn.draw()
     add_friends.draw()

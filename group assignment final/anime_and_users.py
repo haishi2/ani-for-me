@@ -312,9 +312,9 @@ class User:
 
         sorted_values = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         if len(sorted_values) < 10:
-            return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+            return sorted_values
         else:
-            return sorted(scores.items(), key=lambda x: x[1], reverse=True)[0:10]
+            return sorted_values[0:10]
 
 
 if __name__ == '__main__':

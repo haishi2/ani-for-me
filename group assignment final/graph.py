@@ -91,9 +91,9 @@ class ReccomenderGraph:
 
         scores_sorted = sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
         if len(scores_sorted) < 10:
-            return sorted(scores, key=lambda x: x[1], reverse=True)
+            return scores_sorted
         else:
-            return sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
+            return scores_sorted[0:10]
 
     def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path

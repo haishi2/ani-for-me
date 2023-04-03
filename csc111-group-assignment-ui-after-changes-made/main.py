@@ -593,7 +593,7 @@ def run_sign_in(screen: pygame.Surface):
             fill_img(account_button.image, BACK_ARROW_COLOUR)
         if account_button.is_clicked(is_clicking, mouse_pos):
             game_state = 'main'
-            pygame.draw.rect(screen, (255, 255, 255), (175, 295, 400, 64))
+            pygame.draw.rect(screen, (255, 255, 255), (0, 0, 1000, 1000))
 
         if any(event.type == pygame.QUIT for event in events):
             pygame.display.quit()
@@ -609,11 +609,11 @@ def run_search_screen(screen: pygame.surface):
     global game_state
     screen.fill((255, 255, 255))
     account_button = draw_account_button(screen)
-    anime_name_btn = InputBox2(200, 20, 400, 32)
-    search_button = Button(screen, 32, 70, (630, 20), "search", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    anime_name_btn = InputBox2(200, 25, 400, 32)
+    search_button = Button(screen, 32, 70, (630, 25), "search", (51, 51, 51), SECTION_TITLE_COLOUR, (255, 255, 255))
+    Text(screen, 30, "Anime Name:", 70, 30).draw()
 
     while True:
-        Text(screen, 20, "Anime Name:", 90, 30).draw()
         search_button.draw()
         pygame.display.flip()
         events = pygame.event.get()
@@ -632,13 +632,13 @@ def run_search_screen(screen: pygame.surface):
             res = [anime for anime in search(anime_name_btn.text, rec_graph)]
             if len(res) >= 10:
                 for i in range(10):
-                    font = pygame.font.SysFont(FONT_STYLE, 25)
-                    text = font.render(f'{res[i]}', False, (0, 0, 0))
+                    font = pygame.font.SysFont(FONT_STYLE, 27)
+                    text = font.render(f'{res[i]}', True, (0, 0, 0))
                     screen.blit(text, (20, 100 + 50 * i))
             else:
                 for i in range(len(res)):
-                    font = pygame.font.SysFont(FONT_STYLE, 25)
-                    text = font.render(f'{res[i]}', False, (0, 0, 0))
+                    font = pygame.font.SysFont(FONT_STYLE, 27)
+                    text = font.render(f'{res[i]}', True, (0, 0, 0))
                     screen.blit(text, (20, 100 + 50 * i))
             anime_name_btn.text = ''
 
@@ -670,8 +670,9 @@ def run_rate_anime(screen: pygame.Surface):
                             (255, 255, 255))
     ratings = [0, 0, 0, 0, 0, 0]
 
+
     while True:
-        Text(screen, 20, "Anime ID (integer id):", 90, 30).draw()
+        Text(screen, 20, "Anime ID:", 90, 30).draw()
         Text(screen, 20, "Story (0-10):", 90, 80).draw()
         Text(screen, 20, "Animation (0-10):", 90, 130).draw()
         Text(screen, 20, "Sound (0-10):", 90, 180).draw()

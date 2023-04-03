@@ -120,7 +120,6 @@ ACCOUNT_BUTTON_BORDER_COLOUR = (255, 255, 255)
 SINGLE_BUTTON_BORDER_RADIUS = 10
 
 
-
 def get_user(username: str) -> None:
     """Sets global user to user login"""
     global user

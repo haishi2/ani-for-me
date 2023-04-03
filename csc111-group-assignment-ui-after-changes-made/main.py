@@ -127,6 +127,7 @@ def add_anime(anime_name: int, ratings: list[int]) -> None:
     ratings = {r_type[i]: ratings[i] for i in range(6)}
     review = Review(user, anime, ratings)
     user.reviews[anime] = review
+    user.calculate_genre_match_avg()
 
     save_user_profile(user)
 
@@ -553,6 +554,8 @@ def run_sign_in(screen: pygame.Surface):
     create_account_btn = Button(screen, 35, 200, (60, 370), "Create Account", (51, 51, 51), SECTION_TITLE_COLOUR,
                                 (255, 255, 255))
     fav_animes = set()
+    account_button = draw_account_button(screen)
+
     while True:
         # UI Elements
         Text(screen, 36, "Create Account", 60, 170).draw()
@@ -583,6 +586,14 @@ def run_sign_in(screen: pygame.Surface):
 
         pygame.draw.rect(screen, (255, 255, 255), (175, 295, 400, 32))
         fav_anime_btn.draw(screen)
+
+        if account_button.update_colour(mouse_pos):
+            fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
+        else:
+            fill_img(account_button.image, BACK_ARROW_COLOUR)
+        if account_button.is_clicked(is_clicking, mouse_pos):
+            game_state = 'main'
+            pygame.draw.rect(screen, (255, 255, 255), (175, 295, 400, 64))
 
         if any(event.type == pygame.QUIT for event in events):
             pygame.display.quit()
@@ -660,7 +671,7 @@ def run_rate_anime(screen: pygame.Surface):
     ratings = [0, 0, 0, 0, 0, 0]
 
     while True:
-        Text(screen, 20, "Anime ID:", 90, 30).draw()
+        Text(screen, 20, "Anime ID (integer id):", 90, 30).draw()
         Text(screen, 20, "Story (0-10):", 90, 80).draw()
         Text(screen, 20, "Animation (0-10):", 90, 130).draw()
         Text(screen, 20, "Sound (0-10):", 90, 180).draw()

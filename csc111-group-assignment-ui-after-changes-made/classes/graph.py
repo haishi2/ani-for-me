@@ -81,7 +81,6 @@ class ReccomenderGraph:
         """Find all anime at a path length of 3 and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
-            - depth >= 2
             - user in self.users
         """
         watched_animes = user.favorite_animes.union({ani for ani in user.reviews})

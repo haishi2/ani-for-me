@@ -95,8 +95,6 @@ class Anime:
     def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
             list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
-        Preconditions:
-            - depth >= 2
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
         # but it takes more than 1 minute to calculate
@@ -194,8 +192,6 @@ class User:
     def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
             list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
-        Preconditions:
-            - depth >= 2
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
         # but it takes more than 1 minute to calculate

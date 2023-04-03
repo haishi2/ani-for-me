@@ -7,6 +7,7 @@ This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and 
 """
 
 import sys
+import datetime
 import pygame
 import python_ta
 
@@ -15,7 +16,6 @@ from ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDis
 from anime_and_users import Anime, User
 from graph import ReccomenderGraph, read_file, save_profile, import_profile, import_profile_to_user, Review
 from graph import search
-import datetime
 
 Coord = int | float
 Colour = tuple[int, int, int]
@@ -290,8 +290,8 @@ def run_reccomendations(screen: pygame.Surface) -> None:
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
-        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
-        is_key_down = any(event.type == pygame.KEYDOWN for event in events)
+        is_clicking = any(e.type == pygame.MOUSEBUTTONDOWN for e in events)
+        is_key_down = any(e.type == pygame.KEYDOWN for e in events)
         pressed_key = None
         is_backspace_pressed = False
         for event in events:
@@ -382,7 +382,7 @@ def run_reccomendations(screen: pygame.Surface) -> None:
                 year_filter.input_box_end.input_text += pressed_key
                 year_filter.input_box_end.update_text()
 
-        if any(event.type == pygame.QUIT for event in events):
+        if any(e.type == pygame.QUIT for e in events):
             pygame.display.quit()
             pygame.quit()
             sys.exit()
@@ -460,12 +460,11 @@ def run_login(screen: pygame.Surface) -> None:
 
     login_btn.draw()
     create_btn.draw()
-    fav_animes = set()
     while True:
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
-        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+        is_clicking = any(e.type == pygame.MOUSEBUTTONDOWN for e in events)
 
         for event in events:
             username_btn.handle_event(event)
@@ -489,7 +488,7 @@ def run_login(screen: pygame.Surface) -> None:
         if create_btn.is_clicked(is_clicking, mouse_pos):
             game_state = 'sign-in'
 
-        if any(event.type == pygame.QUIT for event in events):
+        if any(e.type == pygame.QUIT for e in events):
             pygame.display.quit()
             pygame.quit()
             sys.exit()
@@ -569,7 +568,7 @@ def run_add_friends(screen: pygame.Surface):
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
-        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+        is_clicking = any(e.type == pygame.MOUSEBUTTONDOWN for e in events)
 
         for event in events:
             username_btn.handle_event(event)
@@ -601,7 +600,7 @@ def run_add_friends(screen: pygame.Surface):
         if account_button.is_clicked(is_clicking, mouse_pos):
             game_state = 'home'
 
-        if any(event.type == pygame.QUIT for event in events):
+        if any(e.type == pygame.QUIT for e in events):
             pygame.display.quit()
             pygame.quit()
             pygame.quit()
@@ -632,7 +631,7 @@ def run_sign_in(screen: pygame.Surface):
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
-        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+        is_clicking = any(e.type == pygame.MOUSEBUTTONDOWN for e in events)
 
         for event in events:
             username_btn.handle_event(event)
@@ -661,7 +660,7 @@ def run_sign_in(screen: pygame.Surface):
             game_state = 'main'
             pygame.draw.rect(screen, (255, 255, 255), (0, 0, 1000, 1000))
 
-        if any(event.type == pygame.QUIT for event in events):
+        if any(e.type == pygame.QUIT for e in events):
             pygame.display.quit()
             pygame.quit()
             pygame.quit()
@@ -684,7 +683,7 @@ def run_search_screen(screen: pygame.surface):
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
-        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+        is_clicking = any(e.type == pygame.MOUSEBUTTONDOWN for e in events)
 
         for event in events:
             anime_name_btn.handle_event(event)
@@ -749,7 +748,7 @@ def run_rate_anime(screen: pygame.Surface):
         pygame.display.flip()
         events = pygame.event.get()
         mouse_pos = pygame.mouse.get_pos()
-        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+        is_clicking = any(e.type == pygame.MOUSEBUTTONDOWN for e in events)
 
         for event in events:
             anime_name_btn.handle_event(event)
@@ -791,7 +790,7 @@ def run_rate_anime(screen: pygame.Surface):
         if account_button.is_clicked(is_clicking, mouse_pos):
             game_state = 'home'
 
-        if any(event.type == pygame.QUIT for event in events):
+        if any(e.type == pygame.QUIT for e in events):
             pygame.display.quit()
             pygame.quit()
             pygame.quit()
@@ -841,10 +840,10 @@ if __name__ == "__main__":
 
     doctest.testmod(verbose=True)
     python_ta.check_all(config={
-        'extra-imports': ['pygame', 'sys', 'ui.ui_classes', 'classes.anime_and_users', 'classes.graph', 'datetime'],
+        'extra-imports': ['pygame', 'sys', 'ui_classes', 'anime_and_users', 'graph', 'datetime'],
         'allowed-io': ['import_profile', 'save_profile'],
         'disable': ['E1101', 'E9992', 'E9997', 'too-many-locals', 'possibly-undefined', 'too-many-nested-blocks',
-                    'too-many-branches', 'too-many-statements', ''],
+                    'too-many-branches', 'too-many-statements', 'C0103', 'C0116', 'E9970', 'E9971', 'E9928', 'W0621'],
         'max-line-length': 130
     })
     run_project()

@@ -310,7 +310,6 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-
         sorted_values = sorted(scores.items(), key=lambda x: x[1], reverse=True)
         if len(sorted_values) < 10:
             return sorted(scores.items(), key=lambda x: x[1], reverse=True)

@@ -83,7 +83,7 @@ class ReccomenderGraph:
         Preconditions:
             - user in self.users
         """
-        watched_animes = user.favorite_animes.union({ani for ani in user.reviews})
+        watched_animes = user.favorite_animes.union(set(user.reviews))
         paths = [pa for pa in user.get_all_path_scores_helper(0, [], list(watched_animes)) if len(pa) > 2]
         scores = []
         for path in paths:
@@ -290,6 +290,7 @@ def import_profile(file: str, graph: ReccomenderGraph) -> aau.User:
         graph.insert_user(u)
         return u
 
+
 def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
     """loads a user from a csv file and adds them into the graph
     Preconditions:
@@ -326,12 +327,11 @@ def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
         else:
             date = None
 
-
         line = reader.readline()
         if line != '' or line != '\n':
             lines = line.split(',')
             priority = {'story': int(lines[0]), 'animation': int(lines[1]), 'sound': int(lines[2]),
-                    'character': int(lines[3])}
+                        'character': int(lines[3])}
         else:
             priority = None
 
@@ -348,7 +348,6 @@ def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
                 line = reader.readline()
         else:
             reviews = None
-
 
         user = aau.User(username, favorite_animes, date, reviews, priority, friends)
         return user
@@ -388,7 +387,7 @@ if __name__ == '__main__':
     doctest.testmod(verbose=True)
     python_ta.check_all(config={
         'extra-imports': ['anime_and_users', 'datetime', 're'],
-        'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search'],
+        'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search', 'import_profile_to_user'],
         'disable': ['too-many-nested-blocks', 'too-many-locals'],
         'max-line-length': 120
     })

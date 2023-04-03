@@ -151,7 +151,7 @@ class FivePointGraph:
             self.screen.blit(text, (legend_points[i][0] - text.get_width() / 2,
                                     legend_points[i][1]))
 
-    def update(self, ratings: list[int]) -> None:
+    def update(self, ratings: list[float]) -> None:
         self.draw()
         print(ratings)
         # Draw the anime's rating
@@ -273,7 +273,7 @@ class AnimeSpotlight:
         self.graph.update(ratings)
 
     def update(self, anime: Anime):
-        self.anime = anime._title
+        self.anime = anime.get_title()
         # self.ratings = list(anime.ratings.values()) Use this if ratings attribute is a dict
         self.ratings = anime.calculate_average_ratings()
         self.draw()
@@ -381,7 +381,7 @@ class RecommendationDisplay:
                  recommendation_button_text_colour: Colour, font_style: str, section_title_colour: Colour):
         self.screen = screen
         self.position = (
-        screen.get_width() * (1 - width_percentage) + 20, screen.get_height() * top_bar_height_percentage)
+            screen.get_width() * (1 - width_percentage) + 20, screen.get_height() * top_bar_height_percentage)
         self.height = screen.get_height() * (1 - top_bar_height_percentage)
         self.width = screen.get_width() * width_percentage
         self.margin = self.width * 0.05
@@ -554,7 +554,7 @@ class PreferenceMeterDisplay:
 
     def get_preferences(self) -> dict[str: int]:
         prio = {'story': self.meters['STORY'].value,
-                'animation' : self.meters['ANIMATION'].value,
+                'animation': self.meters['ANIMATION'].value,
                 'sound': self.meters['SOUND'].value,
                 'character': self.meters['CHARACTER'].value,
                 'num-episodes': 27}
@@ -734,6 +734,7 @@ class AirDateFilterDisplay:
         else:
             return int(start_year), int(end_year)
 
+
 class Text:
     """ Add Text To Screen Class"""
 
@@ -743,7 +744,7 @@ class Text:
     _y: Coord
     _bold: False
 
-    def __init__(self, screen: pygame.surface,  size: int, text: str, x: Coord, y: Coord, bold: Optional[bool] = False):
+    def __init__(self, screen: pygame.surface, size: int, text: str, x: Coord, y: Coord, bold: Optional[bool] = False):
         self._size = size
         self._text = text
         self._x = x
@@ -759,6 +760,8 @@ class Text:
 
 COLOR_INACTIVE = (217, 217, 217)
 COLOR_ACTIVE = (46, 81, 162)
+
+
 # FONT = pygame.font.Font(None, 32)
 
 class InputBox2:
@@ -795,15 +798,14 @@ class InputBox2:
                 self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, (51, 51, 51))
                 return rv
 
-
     def update(self):
         # Resize the box if the text is too long.
-        width = max(200, self.txt_surface.get_width()+10)
+        width = max(200, self.txt_surface.get_width() + 10)
         self.rect.w = width
 
     def draw(self, screen):
         # Blit the text.
-        screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+        screen.blit(self.txt_surface, (self.rect.x + 5, self.rect.y + 5))
         # Blit the rect.
         pygame.draw.rect(screen, self.color, self.rect, 2)
 

@@ -256,11 +256,142 @@ def create_profile(username: str, fav_animes: set[Anime]):
     save_profile(user, filename)
     
     
-def save_user_profile(user: User):
+def save_user_profile(user: User) -> None:
     filename = f"users/{user.username}.csv"
     save_profile(user, filename)
 
+    
+def run_recommendations_based_on_friends(screen: pygame.Surface) -> None:
+  """Visualize the project based on the reccomend_based_on_friends
+  algorithm.
+  """
+  # groundwork/drawing up the screen
+  recommendations = {}
+  global game_state
+  screen.fill((255, 255, 255))
+    draw_top_bar(screen, TOP_BAR_BACKGROUND_COLOUR, TOP_BAR_HEIGHT_PERCENTAGE)
+    account_button = draw_account_button(screen)
+    anime_spotlight = draw_anime_spotlight(screen)
+    recommendation_display = draw_recommendation_display(screen)
+    preference_display = draw_preference_display(screen)
+    generate_button = recommendation_display.generate_button
+    # episode_range_filter = draw_episode_range_filter(screen)
+    year_filter = draw_year_filter(screen)
+    
+    # Import user into graph
+    import_profile(f"users/{user.username}.csv", rec_graph)
+    
+    # rec returns list[Anime]
+    rec_anime = user.reccomend_based_on_friends()
+    
+    # rec_anime = [anime for anime in rec] (NOT NECESSARY AS friend recommendations returns list)
+    
+    # TODO PUT GENERATION HERE 
+    recommendations = recommendation_display.update(rec_anime, anime_spotlight)
+    
+    # ALL OTHER CODE BELOW IS THE SAME AS run_reccomendations
+        while True:
+        pygame.display.flip()
+        events = pygame.event.get()
+        mouse_pos = pygame.mouse.get_pos()
+        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+        is_key_down = any(event.type == pygame.KEYDOWN for event in events)
+        pressed_key = None
+        is_backspace_pressed = False
+        for event in events:
+            if event.type == pygame.KEYDOWN:
+                if event.unicode in ALLOWED_YEAR_INPUT_BOX_INPUTS:
+                    pressed_key = event.unicode
+                if event.key == pygame.K_BACKSPACE:
+                    is_backspace_pressed = True
+        # GENERATE BUTTON
 
+        generate_button.update_colour(mouse_pos)
+        if generate_button.is_clicked(is_clicking, mouse_pos):
+            if year_filter.input_box_start.is_active:
+                year_filter.input_box_start.update_activity()
+            if year_filter.input_box_end.is_active:
+                year_filter.input_box_end.update_activity()
+            # Testing fileter exports
+            # TODO UPDATE PROFILE
+            new_rec_graph = read_file(['csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/profiles_formatted_no_duplicates.csv', 'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/reviews_formatted_no_duplicates.csv'])
+            d1 = datetime.date(year_filter.get_year_range()[0], 1, 1)
+            d2 = datetime.date(year_filter.get_year_range()[1], 1, 1)
+            date_range = (d1, d2)
+            user.favorite_era = date_range
+            prio = preference_display.get_preferences()
+            user.priorities = prio
+            save_profile(user, f"users/{user.username}.csv")
+            import_profile(f"users/{user.username}.csv", new_rec_graph)
+            rec = new_rec_graph.get_all_path_scores(user)
+            rec_anime = [anime[0] for anime in rec]
+            recommendations = recommendation_display.update(rec_anime, anime_spotlight)
+
+        # Account button
+        if account_button.update_colour(mouse_pos):
+            fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
+        else:
+            fill_img(account_button.image, BACK_ARROW_COLOUR)
+        if account_button.is_clicked(is_clicking, mouse_pos):
+            game_state = 'home'
+
+        for recommendation in recommendations:
+            # Update spotlight on button press
+            if recommendations[recommendation][1].is_clicked(is_clicking, mouse_pos):
+                if year_filter.input_box_start.is_active:
+                    year_filter.input_box_start.update_activity()
+                if year_filter.input_box_end.is_active:
+                    year_filter.input_box_end.update_activity()
+                anime_spotlight.update(recommendations[recommendation][0])
+            # Update button colour on hover
+            recommendations[recommendation][1].update_colour(mouse_pos)
+
+        # Update Preference Meters
+        for meter in preference_display.meters:
+            curr_meter = preference_display.meters[meter]
+            if curr_meter.is_clicked(is_clicking, mouse_pos):
+                if year_filter.input_box_start.is_active:
+                    year_filter.input_box_start.update_activity()
+                if year_filter.input_box_end.is_active:
+                    year_filter.input_box_end.update_activity()
+                curr_meter.update(mouse_pos)
+
+        # Year Filter
+        if year_filter.input_box_start.is_clicked(is_clicking, mouse_pos):
+            year_filter.input_box_start.update_activity()
+            if year_filter.input_box_end.is_active:
+                year_filter.input_box_end.update_activity()
+
+        if year_filter.input_box_start.is_active and is_key_down and (pressed_key is not None or is_backspace_pressed):
+            if is_backspace_pressed:
+                year_filter.input_box_start.input_text = year_filter.input_box_start.input_text[:-1]
+                year_filter.input_box_start.update_text()
+            elif len(year_filter.input_box_start.input_text) < 4:
+                year_filter.input_box_start.input_text += pressed_key
+                year_filter.input_box_start.update_text()
+
+        if year_filter.input_box_end.is_clicked(is_clicking, mouse_pos):
+            year_filter.input_box_end.update_activity()
+            if year_filter.input_box_start.is_active:
+                year_filter.input_box_start.update_activity()
+
+        if year_filter.input_box_end.is_active and is_key_down and (pressed_key is not None or is_backspace_pressed):
+            if is_backspace_pressed:
+                year_filter.input_box_end.input_text = year_filter.input_box_end.input_text[:-1]
+                year_filter.input_box_end.update_text()
+            elif len(year_filter.input_box_end.input_text) < 4:
+                year_filter.input_box_end.input_text += pressed_key
+                year_filter.input_box_end.update_text()
+
+        if any(event.type == pygame.QUIT for event in events):
+            pygame.display.quit()
+            pygame.quit()
+            sys.exit()
+
+        if game_state != 'get_rec':
+            break
+            
+    
 def run_reccomendations(screen: pygame.Surface) -> None:
     """Visualize the project"""
     recommendations = {}

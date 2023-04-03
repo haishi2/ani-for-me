@@ -84,7 +84,7 @@ class ReccomenderGraph:
             - depth >= 2
             - user in self.users
         """
-        watched_animes = user.favorite_animes.union({ani for ani in user.reviews})
+        watched_animes = user.favorite_animes.union(set(user.reviews))
         paths = [pa for pa in user.get_all_path_scores_helper(0, [], list(watched_animes)) if len(pa) > 2]
         scores = []
         for path in paths:

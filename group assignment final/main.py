@@ -727,7 +727,7 @@ def run_search_screen(screen: pygame.surface, return_to_login: Optional[bool] = 
             game_state = 'main'
             pygame.draw.rect(screen, (255, 255, 255), (0, 0, 1000, 1000))
 
-        if game_state != 'search' and game_state != 'search_login':
+        if game_state not in {'search', 'search_login'}:
             break
 
 

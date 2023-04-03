@@ -980,6 +980,9 @@ class DropDown2:
 
 
 if __name__ == "__main__":
+    import doctest
+
+    doctest.testmod(verbose=True)
     python_ta.check_all(config={
         'extra-imports': ['pygame', 'math', 'anime_and_users'],
         'allowed-io': ['import_profile', 'save_profile'],

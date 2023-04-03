@@ -673,6 +673,9 @@ class DropDownMenuButton(Button):
 
 
 class DropDownMenu:
+    """ A class representing a drop down menu
+    in the user interface.
+    """
     clicked_buttons: set[str]
     button_collection: dict[str: DropDownMenuButton]
     is_deployed: bool
@@ -680,6 +683,8 @@ class DropDownMenu:
     coordinates: tuple[int, int, int, int]
 
     def __init__(self, font_style: str) -> None:
+        """Initialize a DropDownMenu object.
+        """
         self.clicked_buttons = set()
         self.button_collection = {}
         self.is_deployed = False
@@ -687,10 +692,15 @@ class DropDownMenu:
         self.coordinates = (0, 0, 0, 0)
 
     def add_button(self, name: str, button: DropDownMenuButton) -> None:
+        """Add a button with the given name to the drop down menu on
+        the user interface.
+        """
         self.button_collection[name] = button
 
     def draw_menu(self, screen: pygame.Surface, base_pos: Position, size: tuple[Coord, Coord],
                   menu_bg_colour: Colour) -> None:
+        """Draw a menu in pygame following the given size and position.
+        """
         self.coordinates = base_pos[0] - 3, base_pos[1] - 3, base_pos[0] + size[0] + 6, base_pos[1] + size[1] + 6
         for button in self.button_collection.values():
             menu_outline_rect = pygame.Rect(base_pos[0] - 3, base_pos[1] - 3, size[0] + 6, size[1] + 6)
@@ -700,9 +710,14 @@ class DropDownMenu:
             button.draw()
 
     def update(self) -> None:
+        """Update self.is_deployed to the opposite bool value.
+        """
         self.is_deployed = not self.is_deployed
 
     def clicked_off(self, is_clicking: bool, mouse_pos: Position) -> bool:
+        """Return whether the mouse is clicking within the coordinates
+        of the menu and it is off. 
+        """
         mouse_x_off = not (self.coordinates[0] <= mouse_pos[0] <= self.coordinates[2])
         mouse_y_off = not (self.coordinates[1] <= mouse_pos[1] <= self.coordinates[3])
         is_mouse_off = mouse_x_off or mouse_y_off
@@ -713,6 +728,9 @@ class DropDownMenu:
 
 
 class TextInputBox(Button):
+    """A class representing a box in the user interface
+    where the user can input text.
+    """
     input_text: str
     font: pygame.font.Font
     is_active: bool
@@ -727,6 +745,8 @@ class TextInputBox(Button):
     def __init__(self, screen: pygame.Surface, height: Coord, width: Coord, position: Position,
                  font: pygame.font.Font, colour_passive: Colour, colour_active: Colour, text_colour: Colour,
                  bg_colour: Colour, border_colour: Colour) -> None:
+        """Initialize a TextInputBox object.
+        """
         Button.__init__(self, screen, height, width, position, '', (0, 0, 0), (0, 0, 0), (0, 0, 0),
                         border_colour=border_colour)
         self.input_text = ''
@@ -739,11 +759,18 @@ class TextInputBox(Button):
         self.curr_colour = colour_passive
         self.bg_colour = bg_colour
 
-    def draw(self):
+    def draw(self) -> None:
+        """Draw a rectangle in the pygame user interface that represents the text 
+        input box.
+        """
         btn_rect = pygame.Rect(self.position, (self._width, self._height))
         pygame.draw.rect(self._screen, self.curr_colour, btn_rect, 5)
 
-    def update_activity(self):
+    def update_activity(self) -> None:
+        """Update self.is_active and assign self.curr_colour to a colour
+        depending on whether it is True or False.
+        Draw the text input box. 
+        """
         self.is_active = not self.is_active
         if self.is_active:
             self.curr_colour = self.colour_active
@@ -751,7 +778,10 @@ class TextInputBox(Button):
             self.curr_colour = self.colour_passive
         self.draw()
 
-    def update_text(self):
+    def update_text(self) -> None:
+        """Update the text in the rectangle representing the text input box with
+        self.input_text and the self.text_colour.
+        """
         text_bg = pygame.Rect((self.position[0] + 6, self.position[1] + 6), (self._width - 12, self._height - 12))
         pygame.draw.rect(self._screen, self.bg_colour, text_bg)
         text = self.font.render(self.input_text, True, self.text_colour)
@@ -763,6 +793,8 @@ class TextInputBox(Button):
 
 
 class AirDateFilterDisplay:
+    """
+    """
     screen: pygame.Surface
     height: Coord
     width: Coord
@@ -777,6 +809,8 @@ class AirDateFilterDisplay:
     def __init__(self, screen: pygame.Surface, height_percentage: float, pos_x_percentage: float, text_colour: Colour,
                  input_passive_colour: Colour, input_active_colour: Colour, bg_colour: Colour, title_colour: Colour,
                  font_style: str, border_colour: Colour) -> None:
+        """Initialize a AirDateFilterDisplay object.
+        """
         self.screen = screen
         self.height = screen.get_height() * height_percentage * 0.6
         self.width = screen.get_width() * 0.3

@@ -92,8 +92,8 @@ class Anime:
 
         return {section: round(ratings_dict[section] / len(self.reviews), 2) for section in ratings_dict}
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], 
-                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
+            list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
@@ -189,8 +189,8 @@ class User:
             self.calculate_genre_match_avg()
             self.calculate_priority_weights()
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], 
-                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
+            list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
@@ -310,7 +310,12 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+
+        sorted_values = sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        if len(sorted_values) < 10:
+            return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+        else:
+            return sorted(scores.items(), key=lambda x: x[1], reverse=True)[0:10]
 
 
 if __name__ == '__main__':
@@ -335,4 +340,3 @@ if __name__ == '__main__':
     #
     # g.import_profile('dave.csv', a)
     # d = a.users['dave']
-    

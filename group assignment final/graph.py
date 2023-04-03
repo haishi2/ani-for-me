@@ -89,7 +89,11 @@ class ReccomenderGraph:
         for path in paths:
             scores.append((path[-1].endpoints[1], self.calculate_path_score(path, user)))
 
-        return sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
+        scores_sorted = sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
+        if len(scores_sorted) < 10:
+            return sorted(scores, key=lambda x: x[1], reverse=True)
+        else:
+            return sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
 
     def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path

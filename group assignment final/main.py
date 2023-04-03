@@ -391,6 +391,58 @@ def run_reccomendations(screen: pygame.Surface) -> None:
             break
 
 
+def run_recommendations_based_on_friends(screen: pygame.Surface) -> None:
+    """Visualize the project"""
+    global game_state
+    screen.fill((255, 255, 255))
+    draw_top_bar(screen, TOP_BAR_BACKGROUND_COLOUR, TOP_BAR_HEIGHT_PERCENTAGE)
+    account_button = draw_account_button(screen)
+    anime_spotlight = draw_anime_spotlight(screen)
+    recommendation_display = draw_recommendation_display(screen)
+    generate_button = recommendation_display.generate_button
+
+    # Import user into graph
+    import_profile(f"{user.username}.csv", rec_graph)
+
+    rec = rec_graph.get_all_path_scores(user)
+    rec_anime = [anime[0] for anime in rec]
+    recommendations = recommendation_display.update(rec_anime, anime_spotlight)
+
+    while True:
+        pygame.display.flip()
+        events = pygame.event.get()
+        mouse_pos = pygame.mouse.get_pos()
+        is_clicking = any(event.type == pygame.MOUSEBUTTONDOWN for event in events)
+
+        generate_button.update_colour(mouse_pos)
+        if generate_button.is_clicked(is_clicking, mouse_pos):
+            rec = user.reccomend_based_on_friends()
+            rec_anime = [anime[0] for anime in rec]
+            recommendations = recommendation_display.update(rec_anime, anime_spotlight)
+
+        # Account button
+        if account_button.update_colour(mouse_pos):
+            fill_img(account_button.image, BACK_ARROW_HOVER_COLOUR)
+        else:
+            fill_img(account_button.image, BACK_ARROW_COLOUR)
+        if account_button.is_clicked(is_clicking, mouse_pos):
+            game_state = 'home'
+
+        for recommendation in recommendations:
+            # Update spotlight on button press
+            if recommendations[recommendation][1].is_clicked(is_clicking, mouse_pos):
+                anime_spotlight.update(recommendations[recommendation][0])
+            # Update button colour on hover
+            recommendations[recommendation][1].update_colour(mouse_pos)
+
+        if any(event.type == pygame.QUIT for event in events):
+            pygame.display.quit()
+            pygame.quit()
+            sys.exit()
+
+        if game_state != 'get_rec_friends':
+            break
+
 def run_login(screen: pygame.Surface) -> None:
     """ Log-in Page """
     global game_state
@@ -457,11 +509,14 @@ def run_home(screen: pygame.Surface):
                                  (255, 255, 255))
     search_for_anime_ids = Button(screen, 35, 200, (390, 350), "Get anime identifiers", (51, 51, 51),
                                   SECTION_TITLE_COLOUR, (255, 255, 255))
+    reccomend_friends = Button(screen, 35, 410, (180, 400), "Reccomend based on friends", (51, 51, 51),
+                                  SECTION_TITLE_COLOUR, (255, 255, 255))
 
     rate_btn.draw()
     add_friends.draw()
     get_reccomendations.draw()
     search_for_anime_ids.draw()
+    reccomend_friends.draw()
 
     while True:
         pygame.display.flip()
@@ -473,6 +528,7 @@ def run_home(screen: pygame.Surface):
         add_friends.update_colour(mouse_pos)
         get_reccomendations.update_colour(mouse_pos)
         search_for_anime_ids.update_colour(mouse_pos)
+        reccomend_friends.update_colour(mouse_pos)
 
         if rate_btn.is_clicked(is_clicking, mouse_pos):
             game_state = 'rate'
@@ -485,6 +541,9 @@ def run_home(screen: pygame.Surface):
 
         if search_for_anime_ids.is_clicked(is_clicking, mouse_pos):
             game_state = 'search'
+
+        if reccomend_friends.is_clicked(is_clicking, mouse_pos):
+            game_state = 'get_rec_friends'
 
         if any(event.type == pygame.QUIT for event in events):
             pygame.display.quit()
@@ -773,6 +832,8 @@ def run_project() -> None:
             run_reccomendations(screen)
         elif game_state == 'search':
             run_search_screen(screen)
+        elif game_state == 'get_rec_friends':
+            run_recommendations_based_on_friends(screen)
 
 
 if __name__ == "__main__":

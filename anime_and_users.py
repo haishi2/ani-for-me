@@ -92,8 +92,8 @@ class Anime:
 
         return {section: round(ratings_dict[section] / len(self.reviews), 2) for section in ratings_dict}
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
-            list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User],
+                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         Preconditions:
             - depth >= 2
@@ -191,8 +191,8 @@ class User:
             self.calculate_genre_match_avg()
             self.calculate_priority_weights()
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
-            list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User],
+                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
         Preconditions:
             - depth >= 2

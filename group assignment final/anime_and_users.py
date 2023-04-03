@@ -92,9 +92,11 @@ class Anime:
 
         return {section: round(ratings_dict[section] / len(self.reviews), 2) for section in ratings_dict}
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User],
-                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
+            list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
+        Preconditions:
+            - depth >= 2
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
         # but it takes more than 1 minute to calculate
@@ -189,9 +191,11 @@ class User:
             self.calculate_genre_match_avg()
             self.calculate_priority_weights()
 
-    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User],
-                                   added_ends: list[Anime | User]) -> list[list[g.Review]]:
+    def get_all_path_scores_helper(self, depth: int, visited_nodes: list[Anime | User], added_ends: list[Anime | User]) -> \
+            list[list[g.Review]]:
         """Helper function for get_all_path_scores that calculates all the paths
+        Preconditions:
+            - depth >= 2
         """
         # NOTE: you can optionally change the depth to 5 to get much more reccomendations,
         # but it takes more than 1 minute to calculate
@@ -310,11 +314,7 @@ class User:
         for anime in animes_to_rank:
             scores[anime] = self.calculate_similarity_rating(anime)
 
-        sorted_values = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-        if len(sorted_values) < 10:
-            return sorted_values
-        else:
-            return sorted_values[0:10]
+        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
 
 
 if __name__ == '__main__':
@@ -325,17 +325,17 @@ if __name__ == '__main__':
         'extra-imports': ['graph', 'typing', 'datetime', 're'],
         'allowed-io': ['import_profile', 'save_profile'],
         'disable': ['too-many-nested-blocks', 'too-many-instance-attributes', 'too-many-arguments'],
-        'max-line-length': 120
+        'max-line-length': 130
     })
-    # date1 = datetime.date(2000, 10, 1)
-    # date2 = datetime.date(2005, 10, 1)
-    # a = g.read_file([
-    #     'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates'
-    #     '.csv',
-    #     'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed'
-    #     '/profiles_formatted_no_duplicates.csv',
-    #     'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed'
-    #     '/reviews_formatted_no_duplicates.csv'])
-    #
-    # g.import_profile('dave.csv', a)
-    # d = a.users['dave']
+    date1 = datetime.date(2000, 10, 1)
+    date2 = datetime.date(2005, 10, 1)
+    a = g.read_file([
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed/anime_formatted_no_duplicates'
+        '.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed'
+        '/profiles_formatted_no_duplicates.csv',
+        'csc111_project_formatted_files_and_code/data/formatted_and_duplicates_removed'
+        '/reviews_formatted_no_duplicates.csv'])
+
+    g.import_profile('dave.csv', a)
+    d = a.users['dave']

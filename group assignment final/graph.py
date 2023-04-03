@@ -81,19 +81,16 @@ class ReccomenderGraph:
         """Find all anime at a path length of 3 and calculate a path score for each anime based on
         the reviews given to it and the user's priorities, and returns the anime with the top 10 path scores
         Preconditions:
+            - depth >= 2
             - user in self.users
         """
-        watched_animes = user.favorite_animes.union(set(user.reviews))
+        watched_animes = user.favorite_animes.union({ani for ani in user.reviews})
         paths = [pa for pa in user.get_all_path_scores_helper(0, [], list(watched_animes)) if len(pa) > 2]
         scores = []
         for path in paths:
             scores.append((path[-1].endpoints[1], self.calculate_path_score(path, user)))
 
-        scores_sorted = sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
-        if len(scores_sorted) < 10:
-            return scores_sorted
-        else:
-            return scores_sorted[0:10]
+        return sorted(scores, key=lambda x: x[1], reverse=True)[0:10]
 
     def calculate_path_score(self, path: list[Review], user: aau.User) -> float:
         """Helper function for get_all_path_scores that calculates the path score for the given path
@@ -131,7 +128,8 @@ def tag_keywords_and_strip(query: str) -> set[str]:
     """
     query_cleaned = re.sub('[^0-9a-zA-z@]+', ' ', query)
     query_keywords = query_cleaned.split(' ')
-    connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', 'ova', 'kun', 'a']
+    connecting_words = ['in', 'the', 'and', 'wa', 'no', 'of', 'to', '1st', '2nd', '3rd', 'first', 'second', 'third',
+                        'season', 'ova', 'kun', 'a', '1', '2', '3']
     cleaned_query_keywords = set()
     for keyword in query_keywords:
         if keyword.lower() in connecting_words or keyword in ('', '\n'):
@@ -160,7 +158,7 @@ def search(query: str, graph: ReccomenderGraph) -> dict[str, aau.Anime]:
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
                     searched = True
             if not searched:
-                if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.5:
+                if len(query_tags.intersection(anime_tags)) / len(query_tags) >= 0.4:
                     search_res.append((graph.animes[anime], len(query_tags.intersection(anime_tags)) / len(query_tags)))
             searched = False
     except ZeroDivisionError:
@@ -291,68 +289,6 @@ def import_profile(file: str, graph: ReccomenderGraph) -> aau.User:
         return u
 
 
-def import_profile_to_user(file: str, graph: ReccomenderGraph) -> aau.User:
-    """loads a user from a csv file and adds them into the graph
-    Preconditions:
-        - files are formatted correctly
-        - user not in graph.users.keys()
-        - every anime in the user csv file exists in graph
-        - avery user in the friends_list exists in graph
-    """
-    with open(file, 'r', encoding='utf-8') as reader:
-        line = reader.readline()
-        username = line.split(',')[0]
-
-        line = reader.readline()
-        animes_id = line.split(',')[0:-1]
-        favorite_animes = set()
-        for anime in animes_id:
-            favorite_animes.add(graph.animes[int(anime)])
-
-        line = reader.readline()
-        if line != '' or line != '\n':
-            friends_user = line.split(',')[0:-1]
-            friends = []
-            for user in friends_user:
-                friends.append(graph.users[user])
-        else:
-            friends = None
-
-        line = reader.readline()
-        if line != '' or line != '\n':
-            lines = line.split(',')
-            date1 = datetime.datetime.strptime(lines[0], '%m/%d/%Y').date()
-            date2 = datetime.datetime.strptime(lines[1], '%m/%d/%Y').date()
-            date = (date1, date2)
-        else:
-            date = None
-
-        line = reader.readline()
-        if line != '' or line != '\n':
-            lines = line.split(',')
-            priority = {'story': int(lines[0]), 'animation': int(lines[1]), 'sound': int(lines[2]),
-                        'character': int(lines[3])}
-        else:
-            priority = None
-
-        line = reader.readline()
-        if line != '' or line != '\n':
-            reviews = {}
-            while line != '':
-                lines = line.split(',')
-                ratings_int = []
-                for k in range(1, len(lines)):
-                    ratings_int.append(int(lines[k]))
-
-                reviews[graph.animes[int(lines[0])]] = ratings_int
-                line = reader.readline()
-        else:
-            reviews = None
-
-        user = aau.User(username, favorite_animes, date, reviews, priority, friends)
-        return user
-
-
 def save_profile(user: aau.User, file_name: str) -> None:
     """save the user's profile into a csv file
     Preconditions:
@@ -387,7 +323,7 @@ if __name__ == '__main__':
     doctest.testmod(verbose=True)
     python_ta.check_all(config={
         'extra-imports': ['anime_and_users', 'datetime', 're'],
-        'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search', 'import_profile_to_user'],
+        'allowed-io': ['import_profile', 'save_profile', 'read_file', 'search'],
         'disable': ['too-many-nested-blocks', 'too-many-locals'],
         'max-line-length': 120
     })

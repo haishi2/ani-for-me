@@ -2,7 +2,7 @@
 CSC111 Project: Anime and User classes
 
 This module contains the classes and functions relevant to the User and Anime classes
-and calculating the similarity score for Animes.
+defined and calculating the similarity score for Animes.
 
 This file is Copyright (c) 2023 Hai Shi, Liam Alexander Maguire, Amelia Wu, and Sanya Chawla.
 """

@@ -8,7 +8,7 @@
 
 
 import pygame, sys
-from ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, EpisodeRangeFilterDisplay, \
+from ..ui.ui_classes import AnimeSpotlight, RecommendationDisplay, PreferenceMeterDisplay, EpisodeRangeFilterDisplay, \
     GenreFilterDisplay, Button, AirDateFilterDisplay, Text, TextInputBox, InputBox2, DropDown2
 from other_classes import Anime
 from graph import ReccomenderGraph

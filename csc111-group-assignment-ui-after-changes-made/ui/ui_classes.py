@@ -4,7 +4,7 @@ from typing import Optional
 
 import pygame
 from math import pi, cos, sin, ceil
-from classes.anime_and_users import Anime
+from ..classes.anime_and_users import Anime
 
 Coord = int | float
 Position = tuple[Coord, Coord]
@@ -794,7 +794,7 @@ class InputBox2:
                 # Re-render the text.
                 self.txt_surface = pygame.font.Font(None, 32).render(self.text, True, (51, 51, 51))
                 return rv
-                
+
 
     def update(self):
         # Resize the box if the text is too long.
